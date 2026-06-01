@@ -4,41 +4,31 @@
    Animations: Intersection Observer
    ============================================ */
 
-/*
-  Overview:
-  - This script builds all D3-driven charts and interactive UI elements for the scrollytelling.
-  - Charts are drawn lazily: each section's chart is created when the section enters view.
-  - Many helper functions below handle tooltips, small DOM widgets (book stack), and
-    scroll-driven interactions (e.g., the explosion area chart highlighting).
-  - DATA at the top is placeholder/simulated data used for visual development — replace
-    with real dataset loading logic when ready.
-*/
-
-// ---- PLACEHOLDER DATA (replace with real figures) ----
+// ---- REAL DATA from NYT Bestseller Archive (DATAsets.xlsx) ----
 const DATA = {
 
-  // Section 2 — Scale: entries per decade
+  // Section 2 — Scale: total entries per decade (real data)
   scale: [
-    { decade: '1930s', entries: 820 },
-    { decade: '1940s', entries: 1050 },
-    { decade: '1950s', entries: 1340 },
-    { decade: '1960s', entries: 1680 },
-    { decade: '1970s', entries: 2100 },
-    { decade: '1980s', entries: 2450 },
-    { decade: '1990s', entries: 2800 },
-    { decade: '2000s', entries: 3200 },
-    { decade: '2010s', entries: 3650 },
-    { decade: '2020s', entries: 1900 },
+    { decade: '1930s', entries: 2598 },
+    { decade: '1940s', entries: 5209 },
+    { decade: '1950s', entries: 8303 },
+    { decade: '1960s', entries: 6142 },
+    { decade: '1970s', entries: 5630 },
+    { decade: '1980s', entries: 7898 },
+    { decade: '1990s', entries: 7925 },
+    { decade: '2000s', entries: 7956 },
+    { decade: '2010s', entries: 7990 },
+    { decade: '2020s', entries:  735 },
   ],
 
-  // Section 3 — Origins: 1930s gender split (donut)
+  // Section 3 — Origins: 1930s gender split (real: F 35.8%, M 64.2%)
   origins: [
-    { label: 'Male authors',   value: 73, color: 'var(--male)' },
-    { label: 'Female authors', value: 22, color: 'var(--female)' },
-    { label: 'Unknown/Group',  value:  5, color: '#bca98a' },
+    { label: 'Male authors',   value: 64.2, color: 'var(--male)' },
+    { label: 'Female authors', value: 35.8, color: 'var(--female)' },
+    { label: 'Unknown/Group',  value:  0.0, color: '#bca98a' },
   ],
 
-  // Section 4 — War genres: horizontal bar
+  // Section 4 — War genres: placeholder (genre not in dataset yet)
   warGenres: [
     { genre: 'Military history',    pct: 28 },
     { genre: 'Political biography', pct: 22 },
@@ -48,38 +38,119 @@ const DATA = {
     { genre: 'Other',               pct:  6 },
   ],
 
-  // Section 5 — Pioneers: lollipop
+  // Section 5 — Pioneers: real data from Top female sheet (list entries)
   pioneers: [
-    { name: 'Pearl S. Buck',       weeks: 52 },
-    { name: 'Margaret Mitchell',   weeks: 21 },
-    { name: 'F.P. Keyes',          weeks: 14 },
-    { name: 'Edna Ferber',         weeks: 11 },
-    { name: 'Daphne du Maurier',   weeks:  8 },
+    { name: 'Frances P. Keyes', weeks: 281 },
+    { name: 'Pearl S. Buck',    weeks: 236 },
+    { name: 'Helen MacInnes',   weeks: 307 },
+    { name: 'Daphne Du Maurier',weeks: 317 },
+    { name: 'Edna Ferber',      weeks:  94 },
   ],
 
-  // Section 6 — Explosion: stacked area by year
-  explosion: (() => {
-    const years = d3.range(1931, 2025);
-    return years.map(y => {
-      // Simulated trend: male dominates early, female rises from ~1970
-      const t = (y - 1931) / (2024 - 1931);
-      const sigmoid = 1 / (1 + Math.exp(-12 * (t - 0.48)));
-      const female = Math.min(0.78, Math.max(0.12, sigmoid * 0.72 + 0.1 + (Math.random() - 0.5) * 0.05));
-      const male   = 1 - female;
-      return { year: y, male: +(male * 100).toFixed(1), female: +(female * 100).toFixed(1) };
-    });
-  })(),
+  // Section 6 — Explosion: real yearly % from by_gender sheet
+  explosion: [
+    { year: 1931, male: 68.0, female: 32.0 },
+    { year: 1932, male: 59.0, female: 41.0 },
+    { year: 1933, male: 71.2, female: 28.2 },
+    { year: 1934, male: 70.1, female: 29.9 },
+    { year: 1935, male: 63.0, female: 37.0 },
+    { year: 1936, male: 62.3, female: 37.7 },
+    { year: 1937, male: 71.0, female: 29.0 },
+    { year: 1938, male: 59.0, female: 41.0 },
+    { year: 1939, male: 56.7, female: 43.3 },
+    { year: 1940, male: 76.3, female: 23.7 },
+    { year: 1941, male: 65.7, female: 34.3 },
+    { year: 1942, male: 45.4, female: 54.6 },
+    { year: 1943, male: 65.0, female: 35.0 },
+    { year: 1944, male: 60.2, female: 39.8 },
+    { year: 1945, male: 60.6, female: 39.4 },
+    { year: 1946, male: 54.8, female: 45.2 },
+    { year: 1947, male: 78.5, female: 21.5 },
+    { year: 1948, male: 64.9, female: 35.1 },
+    { year: 1949, male: 72.3, female: 27.7 },
+    { year: 1950, male: 66.1, female: 32.7 },
+    { year: 1951, male: 79.0, female: 21.0 },
+    { year: 1952, male: 68.4, female: 31.6 },
+    { year: 1953, male: 72.3, female: 27.7 },
+    { year: 1954, male: 73.2, female: 26.8 },
+    { year: 1955, male: 71.5, female: 28.5 },
+    { year: 1956, male: 74.3, female: 25.7 },
+    { year: 1957, male: 68.1, female: 31.7 },
+    { year: 1958, male: 66.4, female: 33.6 },
+    { year: 1959, male: 78.9, female: 21.1 },
+    { year: 1960, male: 78.3, female: 21.7 },
+    { year: 1961, male: 71.6, female: 28.4 },
+    { year: 1962, male: 73.0, female: 27.0 },
+    { year: 1963, male: 67.0, female: 33.0 },
+    { year: 1964, male: 81.7, female: 18.3 },
+    { year: 1965, male: 74.2, female: 22.8 },
+    { year: 1966, male: 65.0, female: 35.0 },
+    { year: 1967, male: 65.5, female: 34.5 },
+    { year: 1968, male: 79.2, female: 20.8 },
+    { year: 1969, male: 65.6, female: 34.4 },
+    { year: 1970, male: 62.9, female: 37.1 },
+    { year: 1971, male: 76.9, female: 23.1 },
+    { year: 1972, male: 78.5, female: 21.5 },
+    { year: 1973, male: 71.0, female: 29.0 },
+    { year: 1974, male: 78.3, female: 21.7 },
+    { year: 1975, male: 86.5, female: 13.5 },
+    { year: 1976, male: 70.4, female: 29.6 },
+    { year: 1977, male: 74.8, female: 25.2 },
+    { year: 1978, male: 70.2, female: 29.8 },
+    { year: 1979, male: 79.9, female: 20.1 },
+    { year: 1980, male: 69.6, female: 30.4 },
+    { year: 1981, male: 82.8, female: 17.2 },
+    { year: 1982, male: 74.9, female: 25.1 },
+    { year: 1983, male: 70.5, female: 29.5 },
+    { year: 1984, male: 71.1, female: 28.9 },
+    { year: 1985, male: 77.3, female: 22.7 },
+    { year: 1986, male: 67.5, female: 32.5 },
+    { year: 1987, male: 78.4, female: 21.6 },
+    { year: 1988, male: 68.9, female: 31.1 },
+    { year: 1989, male: 71.6, female: 28.4 },
+    { year: 1990, male: 74.7, female: 25.3 },
+    { year: 1991, male: 62.5, female: 37.1 },
+    { year: 1992, male: 64.3, female: 32.4 },
+    { year: 1993, male: 71.0, female: 29.0 },
+    { year: 1994, male: 67.8, female: 32.2 },
+    { year: 1995, male: 66.2, female: 32.8 },
+    { year: 1996, male: 67.5, female: 29.3 },
+    { year: 1997, male: 66.1, female: 33.9 },
+    { year: 1998, male: 58.7, female: 41.3 },
+    { year: 1999, male: 51.2, female: 48.8 },
+    { year: 2000, male: 51.4, female: 48.6 },
+    { year: 2001, male: 55.6, female: 44.4 },
+    { year: 2002, male: 61.6, female: 38.4 },
+    { year: 2003, male: 62.4, female: 37.6 },
+    { year: 2004, male: 61.5, female: 38.3 },
+    { year: 2005, male: 65.6, female: 34.4 },
+    { year: 2006, male: 57.0, female: 42.5 },
+    { year: 2007, male: 64.3, female: 35.7 },
+    { year: 2008, male: 57.7, female: 42.3 },
+    { year: 2009, male: 53.4, female: 46.6 },
+    { year: 2010, male: 62.0, female: 38.0 },
+    { year: 2011, male: 61.3, female: 38.8 },
+    { year: 2012, male: 60.4, female: 39.6 },
+    { year: 2013, male: 58.8, female: 41.2 },
+    { year: 2014, male: 55.7, female: 44.3 },
+    { year: 2015, male: 54.6, female: 45.4 },
+    { year: 2016, male: 49.3, female: 50.7 },
+    { year: 2017, male: 58.0, female: 41.9 },
+    { year: 2018, male: 48.0, female: 52.0 },
+    { year: 2019, male: 52.9, female: 47.1 },
+    { year: 2020, male: 40.3, female: 59.3 },
+  ],
 
-  // Section 7 — Queens: horizontal ranked bar (with rich tooltip data)
+  // Section 7 — Queens: real data from Top female sheet (total list appearances)
   queens: [
-    { name: 'Danielle Steel',     weeks: 381, book: 'Secrets (1985)',            decade: 'Dominated 1980s–2000s', color: '#c9a84c' },
-    { name: 'Nora Roberts',       weeks: 342, book: 'The Witness (2012)',         decade: 'Reigned 1990s–2020s',   color: '#b87aaa' },
-    { name: 'Janet Evanovich',    weeks: 187, book: 'One for the Money (1994)',   decade: 'Peak 1990s–2010s',      color: '#a06898' },
-    { name: 'Sandra Brown',       weeks: 156, book: 'Mirror Image (1990)',        decade: 'Thriller queen, 1990s', color: '#905886' },
-    { name: 'Mary Higgins Clark', weeks: 134, book: 'Where Are the Children? (1975)', decade: 'Pioneer of suspense', color: '#804874' },
-    { name: 'Jodi Picoult',       weeks: 118, book: 'My Sister\'s Keeper (2004)', decade: 'Literary drama, 2000s', color: '#703862' },
-    { name: 'Lisa Scottoline',    weeks:  94, book: 'Everywhere That Mary Went (1993)', decade: 'Legal thriller icon', color: '#602850' },
-    { name: 'Sophie Kinsella',    weeks:  82, book: 'Confessions of a Shopaholic (2001)', decade: 'Rom-com revolution', color: '#501840' },
+    { name: 'Danielle Steel',          weeks: 957, book: 'Secrets (1985)',                    decade: 'Dominated 1980s–2010s', color: '#c9a84c' },
+    { name: 'Taylor Caldwell',         weeks: 524, book: 'Captains and the Kings (1972)',     decade: 'Mid-century giant',     color: '#c09040' },
+    { name: 'Mary Higgins Clark',      weeks: 403, book: 'Where Are the Children? (1975)',   decade: 'Queen of suspense',     color: '#b07aaa' },
+    { name: 'Daphne Du Maurier',       weeks: 317, book: 'Rebecca (1938)',                   decade: 'Pioneer, 1930s–60s',    color: '#a06898' },
+    { name: 'Helen MacInnes',          weeks: 307, book: 'Above Suspicion (1939)',           decade: 'Spy thriller icon',     color: '#905886' },
+    { name: 'Mary Stewart',            weeks: 294, book: 'The Crystal Cave (1970)',          decade: 'Romance & mystery',     color: '#804874' },
+    { name: 'Frances Parkinson Keyes', weeks: 281, book: "Dinner at Antoine's (1948)",       decade: 'Pioneer, 1930s–50s',    color: '#703862' },
+    { name: 'Pearl S. Buck',           weeks: 236, book: 'The Good Earth (1931)',            decade: 'Nobel laureate, 1930s', color: '#602850' },
   ],
 
   // Section 8 — Genres by decade: grouped bar (ALL view)
@@ -117,27 +188,27 @@ const DATA = {
     ],
   },
 
-  // Section 9 — Today: donut (fiction 2020–2024)
+  // Section 9 — Today: real data 2016–2020 (overall list)
   today: [
-    { label: 'Female authors', value: 62, color: 'var(--female)' },
-    { label: 'Male authors',   value: 35, color: 'var(--male)' },
-    { label: 'Non-binary/Other', value: 3, color: '#bca98a' },
+    { label: 'Female authors',   value: 50.1, color: 'var(--female)' },
+    { label: 'Male authors',     value: 49.8, color: 'var(--male)' },
+    { label: 'Non-binary/Other', value:  0.1, color: '#bca98a' },
   ],
 
-  // Section 10 — Prestige: scatter / grouped bar
+  // Section 10 — Prestige: real cross-reference NYT list × Pulitzer Fiction winners
+  // Female Pulitzer Fiction winners: 23, of which 21 appeared on NYT list (91%)
+  // Male Pulitzer Fiction winners:   30, of which 26 appeared on NYT list (87%)
+  // Of all unique female titles on NYT: ~16% authored by Pulitzer-winning authors
+  // Of all unique male titles on NYT:   ~15% authored by Pulitzer-winning authors
   prestige: [
-    { category: 'Male bestsellers',   pct_prize: 10, total: 11200 },
-    { category: 'Female bestsellers', pct_prize:  6, total:  9100 },
-    { category: 'Male Pulitzer winners',   pct_best: 38, total: 65 },
-    { category: 'Female Pulitzer winners', pct_best: 28, total: 42 },
+    { category: 'Male bestsellers',          pct_prize: 15.4, total: 4444 },
+    { category: 'Female bestsellers',        pct_prize: 16.3, total: 2974 },
+    { category: 'Male Pulitzer → on list',   pct_prize: 87,   total: 30 },
+    { category: 'Female Pulitzer → on list', pct_prize: 91,   total: 23 },
   ],
 };
 
 // ---- TOOLTIP ----
-// Lightweight page-level tooltip used by many charts.
-// - `showTooltip(e, html)` sets content and positions the tooltip near the mouse.
-// - `moveTooltip(e)` repositions it on global mousemove events while visible.
-// - `hideTooltip()` hides the tooltip.
 const tooltip = document.createElement('div');
 tooltip.className = 'd3-tooltip';
 document.body.appendChild(tooltip);
@@ -154,8 +225,6 @@ function moveTooltip(e) {
 function hideTooltip() { tooltip.style.opacity = '0'; }
 
 // ---- COLOUR HELPERS ----
-// Centralised color palette used across charts for consistent styling.
-// These map semantic names (male/female/gold) to hexadecimal color values.
 const C = {
   male:   '#4a6fa5',
   female: '#8b4a7a',
@@ -167,12 +236,6 @@ const C = {
 // ============================================================
 // CHART BUILDERS
 // ============================================================
-
-/*
-  CHART_MAP: maps section ids to the function that draws that section's chart.
-  The `sectionObserver` (below) calls the mapped function after a short delay
-  when a section becomes visible, which avoids drawing everything at once.
-*/
 
 // ---- SECTION 2: Growing Bar Chart (scale) ----
 function drawScale() {
@@ -789,10 +852,10 @@ function drawToday() {
 
   g.append('text').attr('text-anchor','middle').attr('dy','-0.2em')
     .style('font-family','Playfair Display,serif').style('font-size','2rem').style('font-weight','900')
-    .style('fill','#8b4a7a').text('62%');
+    .style('fill','#8b4a7a').text('50.1%');
   g.append('text').attr('text-anchor','middle').attr('dy','1.4em')
     .style('font-family','Lora,serif').style('font-size','0.7rem').style('font-style','italic')
-    .style('fill',C.sepia).text('female, 2020–24');
+    .style('fill',C.sepia).text('female, 2016–20');
 
   const legend = svg.append('g').attr('transform',`translate(${size/2 - 95}, ${size-28})`);
   DATA.today.forEach((d,i) => {
@@ -808,48 +871,101 @@ function drawPrestige() {
   if (!el || el.dataset.drawn) return;
   el.dataset.drawn = '1';
 
-  const W = el.clientWidth || 600, H = 280;
-  const margin = { top: 20, right: 30, bottom: 60, left: 50 };
+  const W = el.clientWidth || 620, H = 300;
+  const margin = { top: 30, right: 30, bottom: 75, left: 50 };
   const w = W - margin.left - margin.right;
   const h = H - margin.top - margin.bottom;
 
-  const data = [
-    { label: 'Male bestsellers\nwith major prize', pct: 10, color: C.male },
-    { label: 'Female bestsellers\nwith major prize', pct:  6, color: C.female },
-    { label: 'Male Pulitzer\non list', pct: 38, color: C.male, opacity: 0.5 },
-    { label: 'Female Pulitzer\non list', pct: 28, color: C.female, opacity: 0.5 },
+  // Two groups: "% of bestsellers by Pulitzer authors" and "% of Pulitzer winners who hit the list"
+  const groups = [
+    {
+      label: '% of NYT titles by\nPulitzer authors',
+      bars: [
+        { sub: 'Male', pct: 15.4, color: C.male, n: '4,444 titles' },
+        { sub: 'Female', pct: 16.3, color: C.female, n: '2,974 titles' },
+      ]
+    },
+    {
+      label: '% of Pulitzer Fiction\nwinners on NYT list',
+      bars: [
+        { sub: 'Male', pct: 87, color: C.male, n: '30 winners' },
+        { sub: 'Female', pct: 91, color: C.female, n: '23 winners' },
+      ]
+    }
   ];
 
   const svg = d3.select(el).append('svg').attr('width',W).attr('height',H).style('overflow','visible');
   const g = svg.append('g').attr('transform',`translate(${margin.left},${margin.top})`);
 
-  const x = d3.scaleBand().domain(data.map(d=>d.label)).range([0,w]).padding(0.3);
-  const y = d3.scaleLinear().domain([0,50]).nice().range([h,0]);
+  const x0 = d3.scaleBand().domain(groups.map(d=>d.label)).range([0,w]).padding(0.35);
+  const x1 = d3.scaleBand().domain(['Male','Female']).range([0, x0.bandwidth()]).padding(0.1);
+  const y  = d3.scaleLinear().domain([0, 100]).range([h, 0]);
 
-  g.selectAll('.p-bar').data(data).enter().append('rect')
-    .attr('x', d => x(d.label)).attr('width', x.bandwidth())
+  // Grid
+  g.selectAll('.pg').data(y.ticks(5)).enter().append('line')
+    .attr('x1',0).attr('x2',w).attr('y1',d=>y(d)).attr('y2',d=>y(d))
+    .attr('stroke','rgba(255,255,255,0.07)').attr('stroke-dasharray','3,3');
+
+  // Groups
+  const grpG = g.selectAll('.pgroup').data(groups).enter().append('g')
+    .attr('transform', d => `translate(${x0(d.label)},0)`);
+
+  grpG.selectAll('rect').data(d => d.bars)
+    .enter().append('rect')
+    .attr('x', d => x1(d.sub)).attr('width', x1.bandwidth())
     .attr('y', h).attr('height', 0)
-    .attr('fill', d => d.color).attr('opacity', d => d.opacity || 1).attr('rx', 3)
-    .on('mousemove', (e,d) => showTooltip(e, `<strong>${d.label.replace('\n',' ')}</strong><br/>${d.pct}%`))
+    .attr('fill', d => d.color).attr('rx', 3)
+    .on('mousemove', (e, d) => showTooltip(e, `<strong>${d.sub}</strong><br/>${d.pct}%<br/><span style="font-size:10px;opacity:0.7">${d.n}</span>`))
     .on('mouseleave', hideTooltip)
-    .transition().duration(700).delay((d,i)=>i*100)
+    .transition().duration(750).delay((d,i) => i*120)
     .attr('y', d => y(d.pct)).attr('height', d => h - y(d.pct));
 
-  g.selectAll('.p-label').data(data).enter().append('text')
-    .attr('x', d => x(d.label) + x.bandwidth()/2)
-    .attr('y', d => y(d.pct) - 6)
+  grpG.selectAll('.p-val').data(d => d.bars)
+    .enter().append('text')
+    .attr('x', d => x1(d.sub) + x1.bandwidth()/2)
+    .attr('y', d => y(d.pct) - 7)
     .attr('text-anchor','middle')
-    .style('font-family','Playfair Display,serif').style('font-size','13px').style('font-weight','700')
-    .style('fill', '#e8c97a').text(d => d.pct + '%');
+    .style('font-family','Playfair Display,serif').style('font-size','14px').style('font-weight','700')
+    .style('fill','#e8c97a')
+    .text(d => d.pct + '%')
+    .style('opacity',0).transition().delay((d,i)=>i*120+400).duration(300).style('opacity',1);
 
-  // Axis only bottom, custom tick labels
-  const xAxis = g.append('g').attr('class','d3-axis').attr('transform',`translate(0,${h})`).call(d3.axisBottom(x).tickSize(0));
-  xAxis.select('.domain').remove();
-  xAxis.selectAll('text')
-    .style('font-size','9px').style('font-style','italic')
-    .attr('dy','1.2em').text(d => d.split('\n')[0]);
+  // Sub-labels (Male/Female) inside bars
+  grpG.selectAll('.p-sub').data(d => d.bars)
+    .enter().append('text')
+    .attr('x', d => x1(d.sub) + x1.bandwidth()/2)
+    .attr('y', h - 6)
+    .attr('text-anchor','middle')
+    .style('font-family','Lora,serif').style('font-size','10px').style('font-style','italic')
+    .style('fill','rgba(255,255,255,0.55)').text(d => d.sub);
 
-  g.append('g').attr('class','d3-axis').call(d3.axisLeft(y).ticks(5).tickFormat(d=>d+'%')).select('.domain').remove();
+  // Group axis labels (split on \n)
+  g.append('g').attr('class','d3-axis')
+    .attr('transform',`translate(0,${h})`)
+    .call(d3.axisBottom(x0).tickSize(0))
+    .select('.domain').remove();
+
+  g.selectAll('.d3-axis text')
+    .style('font-size','11px').style('font-style','italic')
+    .each(function(d) {
+      const el = d3.select(this);
+      const lines = d.split('\n');
+      el.text(null);
+      lines.forEach((line, i) => {
+        el.append('tspan').attr('x', 0).attr('dy', i === 0 ? '1.2em' : '1.3em').text(line);
+      });
+    });
+
+  g.append('g').attr('class','d3-axis')
+    .call(d3.axisLeft(y).ticks(5).tickFormat(d=>d+'%')).select('.domain').remove();
+
+  // Legend
+  const legend = g.append('g').attr('transform',`translate(${w - 120}, -25)`);
+  [{ label:'Male', color: C.male }, { label:'Female', color: C.female }].forEach((d,i) => {
+    const lg = legend.append('g').attr('transform',`translate(${i*65},0)`);
+    lg.append('rect').attr('width',10).attr('height',10).attr('rx',2).attr('fill',d.color);
+    lg.append('text').attr('x',14).attr('y',9).style('font-family','Lora,serif').style('font-size','10px').style('fill','#9e8f7c').text(d.label);
+  });
 }
 
 // ============================================================
@@ -904,13 +1020,6 @@ const CHART_MAP = {
   'section-10': () => drawPrestige(),
 };
 
-/*
-  revealObserver: small animation observer that adds `.visible` to elements
-  (elements with classes like `reveal-up`) so CSS transitions reveal them.
-
-  sectionObserver: watches full section elements and triggers chart drawing
-  and nav-dot updates when a chapter enters view.
-*/
 const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
@@ -940,8 +1049,6 @@ const sectionObserver = new IntersectionObserver((entries) => {
 // ============================================================
 // PROGRESS BAR
 // ============================================================
-// `updateProgress` updates the thin progress bar at the top of the page
-// based on scroll position. It's bound to the window `scroll` event.
 function updateProgress() {
   const bar = document.getElementById('progressBar');
   if (!bar) return;
@@ -953,8 +1060,6 @@ function updateProgress() {
 // ============================================================
 // INIT
 // ============================================================
-// Initialization: builds the decorative book stack and wires up all observers,
-// navigation, and global tooltip behavior. Runs on `DOMContentLoaded`.
 document.addEventListener('DOMContentLoaded', () => {
   buildBookStack();
 
