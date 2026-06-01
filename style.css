@@ -1,0 +1,772 @@
+/* ============================================
+   BESTSELLERS SCROLLYTELLING — style.css
+   Aesthetic: Warm / Literary / Book-like
+   ============================================ */
+
+/* ---- RESET & ROOT ---- */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --cream:       #f5f0e8;
+  --parchment:   #ede4d0;
+  --warm-white:  #faf7f2;
+  --ink:         #1c1209;
+  --ink-light:   #3d2b1f;
+  --sepia:       #7a5c3a;
+  --sepia-light: #b08060;
+  --rust:        #8b3a2a;
+  --rust-light:  #c4624a;
+  --slate:       #2c3e50;
+  --gold:        #c9a84c;
+  --gold-light:  #e8c97a;
+
+  /* Gender palette */
+  --male:        #4a6fa5;
+  --male-light:  #7a9fc5;
+  --female:      #8b4a7a;
+  --female-light:#b87aaa;
+
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body:    'Lora', Georgia, serif;
+  --font-accent:  'IM Fell English', Georgia, serif;
+
+  --section-pad: clamp(4rem, 8vw, 8rem);
+  --content-max: 1100px;
+}
+
+/*
+  Design tokens explained:
+  - Color variables provide a consistent palette (cream/parchment/sepia/rust/gold).
+  - `--male` and `--female` are semantic colors used by charts to represent gender.
+  - Font variables choose display and body typefaces for headline vs body text.
+  - `--section-pad` and `--content-max` control vertical spacing and content width.
+*/
+
+html { scroll-behavior: smooth; font-size: 16px; }
+
+body {
+  background: var(--cream);
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.75;
+  overflow-x: hidden;
+}
+
+/* ---- SCROLLBAR ---- */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--parchment); }
+::-webkit-scrollbar-thumb { background: var(--sepia); border-radius: 3px; }
+
+/* ---- PROGRESS BAR ---- */
+.progress-bar {
+  position: fixed;
+  top: 0; left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, var(--gold), var(--rust));
+  z-index: 1000;
+  transition: width 0.1s linear;
+}
+
+/* ---- NAV DOTS ---- */
+.chapter-nav {
+  position: fixed;
+  right: 1.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 999;
+}
+
+.chapter-nav ul { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+
+.nav-dot {
+  display: block;
+  position: relative;
+  width: 10px; height: 10px;
+}
+
+.nav-dot span {
+  display: block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--sepia);
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+.nav-dot::after {
+  content: attr(data-label);
+  position: absolute;
+  right: 1.6rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  color: var(--sepia);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.nav-dot:hover::after,
+.nav-dot.active::after { opacity: 1; }
+
+.nav-dot.active span,
+.nav-dot:hover span {
+  background: var(--rust);
+  border-color: var(--rust);
+  transform: scale(1.3);
+}
+
+/* ---- PAPER TEXTURE ---- */
+.paper-texture {
+  position: absolute;
+  inset: 0;
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ---- SECTIONS ---- */
+.chapter {
+  position: relative;
+  min-height: 100vh;
+  padding: var(--section-pad) clamp(1.5rem, 5vw, 4rem);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background: var(--cream);
+}
+
+/*
+  Section layout notes:
+  - Each `.chapter` is full-viewport height, with centered content.
+  - `.chapter-alt`, `.chapter-dark`, and `.chapter-finale` provide visual
+    variations for alternating sections (lighter/darker backgrounds).
+*/
+
+.chapter-alt  { background: var(--warm-white); }
+.chapter-dark {
+  background: var(--ink);
+  color: var(--cream);
+}
+.chapter-dark .chapter-label { color: var(--gold-light); }
+.chapter-dark .body-text { color: #c8bfb0; }
+.chapter-dark .chart-caption { color: #9e8f7c; }
+.chapter-dark .stat-card {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.1);
+}
+.chapter-dark .stat-desc { color: #a09282; }
+
+.chapter-finale {
+  background: var(--ink-light);
+  color: var(--cream);
+}
+.chapter-finale .chapter-label { color: var(--gold); }
+.chapter-finale .body-text { color: #c8bfb0; }
+.chapter-finale .chart-caption { color: #9e8f7c; }
+
+/* Background chapter numbers */
+.chapter-number-bg {
+  position: absolute;
+  bottom: -0.1em;
+  right: 0.05em;
+  font-family: var(--font-display);
+  font-size: clamp(8rem, 20vw, 18rem);
+  font-weight: 900;
+  color: rgba(0,0,0,0.035);
+  line-height: 1;
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+.chapter-dark .chapter-number-bg,
+.chapter-finale .chapter-number-bg { color: rgba(255,255,255,0.04); }
+
+/* ---- LAYOUT ---- */
+.chapter-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: var(--content-max);
+  margin: 0 auto;
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: center;
+}
+
+.centered { text-align: center; }
+.centered .body-text { max-width: 62ch; margin: 0 auto; }
+
+/* ---- HOOK LAYOUT ---- */
+.hook-layout {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 4rem;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.chapter-label {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-style: italic;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--sepia);
+  margin-bottom: 1.2rem;
+}
+
+.hook-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.8rem, 6vw, 5.5rem);
+  font-weight: 900;
+  line-height: 1.05;
+  color: var(--ink);
+  margin-bottom: 1.5rem;
+}
+
+.hook-title em {
+  color: var(--rust);
+  font-style: italic;
+}
+
+.hook-sub {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  color: var(--sepia);
+  max-width: 45ch;
+  line-height: 1.8;
+  margin-bottom: 2.5rem;
+}
+
+/* ---- SCROLL CUE ---- */
+.scroll-cue {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  color: var(--sepia-light);
+  font-size: 0.78rem;
+  font-style: italic;
+  letter-spacing: 0.08em;
+}
+
+.scroll-arrow {
+  animation: bob 2s ease-in-out infinite;
+  font-size: 1.2rem;
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(6px); }
+}
+
+/* ---- BOOK STACK ---- */
+.hook-visual {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.book-stack {
+  position: relative;
+  width: 220px;
+  height: 320px;
+}
+
+.book {
+  position: absolute;
+  width: 160px;
+  height: 220px;
+  border-radius: 3px 8px 8px 3px;
+  box-shadow: 4px 4px 12px rgba(0,0,0,0.25), inset -3px 0 6px rgba(0,0,0,0.12);
+  transform-origin: bottom center;
+}
+
+.hook-stat {
+  margin-top: 2rem;
+  text-align: center;
+}
+
+.stat-big {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 5rem;
+  font-weight: 900;
+  color: var(--rust);
+  line-height: 1;
+}
+
+.stat-label {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--sepia);
+  letter-spacing: 0.1em;
+}
+
+/* ---- TYPOGRAPHY ---- */
+h2 {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--ink);
+  margin-bottom: 1.5rem;
+}
+
+.chapter-dark h2,
+.chapter-finale h2 { color: var(--cream); }
+
+h2 em { color: var(--rust); font-style: italic; }
+
+.body-text {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.9;
+  color: var(--ink-light);
+  max-width: 52ch;
+}
+
+.body-text strong { color: var(--rust); font-weight: 600; }
+.body-text em { font-style: italic; color: var(--sepia); }
+
+.pull-quote {
+  margin: 2rem 0;
+  padding: 1rem 1.5rem;
+  border-left: 3px solid var(--gold);
+  font-family: var(--font-accent);
+  font-style: italic;
+  font-size: 1.05rem;
+  color: var(--sepia);
+  background: rgba(201,168,76,0.07);
+  border-radius: 0 4px 4px 0;
+}
+
+/* ---- CHARTS ---- */
+.text-block { }
+
+.chart-block {
+  width: 100%;
+  transition-delay: var(--delay, 0s);
+}
+
+.chart-container {
+  width: 100%;
+  min-height: 300px;
+  background: rgba(255,255,255,0.5);
+  border: 1px solid rgba(120,90,60,0.15);
+  border-radius: 6px;
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+}
+
+.chart-wide { min-height: 380px; }
+
+.chart-caption {
+  margin-top: 0.75rem;
+  font-size: 0.75rem;
+  font-style: italic;
+  color: var(--sepia-light);
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+
+.chapter-dark .chart-container,
+.chapter-finale .chart-container {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.08);
+}
+
+/* ---- STATS ROW ---- */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin: 2.5rem 0;
+}
+
+.stat-card {
+  padding: 1.5rem;
+  border: 1px solid rgba(120,90,60,0.2);
+  border-radius: 6px;
+  text-align: center;
+  background: rgba(255,255,255,0.06);
+}
+
+.stat-number {
+  font-family: var(--font-display);
+  font-size: 2.8rem;
+  font-weight: 900;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.stat-number span {
+  font-size: 1.5rem;
+  vertical-align: super;
+}
+
+.stat-desc {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--sepia-light);
+  line-height: 1.5;
+}
+
+/* ---- PIONEERS ---- */
+.pioneer-list {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.pioneer-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0;
+  border-bottom: 1px dashed rgba(120,90,60,0.25);
+  font-size: 0.92rem;
+}
+
+.pioneer-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--ink);
+  font-style: italic;
+}
+
+.pioneer-weeks {
+  font-family: var(--font-body);
+  font-size: 0.82rem;
+  color: var(--rust);
+  font-weight: 600;
+  background: rgba(139,58,42,0.1);
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+}
+
+/* ---- FINALE ---- */
+.finale-stats {
+  text-align: center;
+  margin: 2.5rem 0;
+}
+
+.finale-number {
+  display: block;
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 10vw, 8rem);
+  font-weight: 900;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.finale-number span {
+  font-size: 50%;
+  vertical-align: super;
+}
+
+.finale-label {
+  display: block;
+  margin-top: 0.5rem;
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: 1rem;
+  color: #a09282;
+  max-width: 40ch;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+.closing {
+  text-align: center;
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.closing-text {
+  font-size: 0.75rem;
+  color: #6e5f50;
+  letter-spacing: 0.08em;
+}
+
+.closing-note {
+  margin-top: 0.5rem;
+  font-size: 0.72rem;
+  color: #5a4c3d;
+  font-style: italic;
+}
+
+/* ---- REVEAL ANIMATIONS ---- */
+.reveal-up,
+.reveal-left,
+.reveal-right {
+  opacity: 0;
+  transition: opacity 0.9s ease, transform 0.9s ease;
+  transition-delay: var(--delay, 0s);
+}
+
+/*
+  Reveal animations:
+  - Elements tagged with `.reveal-*` are initially translated and transparent.
+  - When the JS `revealObserver` adds `.visible`, CSS transitions undo the transform
+    producing a smooth entrance effect.
+*/
+
+.reveal-up    { transform: translateY(40px); }
+.reveal-left  { transform: translateX(-40px); }
+.reveal-right { transform: translateX(40px); }
+
+.reveal-up.visible,
+.reveal-left.visible,
+.reveal-right.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---- D3 STYLES ---- */
+.d3-axis path,
+.d3-axis line { stroke: rgba(120,90,60,0.3); }
+.d3-axis text {
+  font-family: var(--font-body);
+  font-size: 11px;
+  fill: var(--sepia);
+}
+
+.chapter-dark .d3-axis path,
+.chapter-dark .d3-axis line,
+.chapter-finale .d3-axis path,
+.chapter-finale .d3-axis line { stroke: rgba(255,255,255,0.15); }
+
+.chapter-dark .d3-axis text,
+.chapter-finale .d3-axis text { fill: #9e8f7c; }
+
+.d3-tooltip {
+  position: fixed;
+  background: var(--ink);
+  color: var(--cream);
+  padding: 0.5rem 0.8rem;
+  border-radius: 4px;
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+  z-index: 9999;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+/* ---- EXPLOSION SCROLL LAYOUT ---- */
+.explosion-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: start;
+  min-height: 100vh;
+}
+
+/*
+  Explosion layout notes:
+  - This two-column layout pairs a sticky chart panel with vertically long
+    narrative scroll steps on the right. The chart remains visible while the
+    user scrolls through the explanatory steps, which trigger highlighting
+    ranges on the chart via JS.
+*/
+
+.sticky-chart-panel {
+  position: sticky;
+  top: calc(50vh - 220px);
+  align-self: start;
+}
+
+.scroll-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 20vh 0 40vh;
+}
+
+.scroll-step {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem 0;
+  border-left: 2px solid transparent;
+  padding-left: 1.5rem;
+  transition: border-color 0.4s ease;
+}
+
+.scroll-step.active-step {
+  border-left-color: var(--gold);
+}
+
+.scroll-step .step-label {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-style: italic;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--sepia);
+  margin-bottom: 1rem;
+}
+
+/* Area chart highlight overlay */
+.explosion-highlight-rect {
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+/* ---- FILTER BUTTONS ---- */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-label {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-style: italic;
+  color: var(--sepia-light);
+  margin-right: 0.3rem;
+}
+
+.filter-btn {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  padding: 0.4rem 1.1rem;
+  border: 1.5px solid var(--sepia-light);
+  border-radius: 20px;
+  background: transparent;
+  color: var(--sepia);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  letter-spacing: 0.04em;
+}
+
+.filter-btn:hover {
+  border-color: var(--rust);
+  color: var(--rust);
+  background: rgba(139,58,42,0.06);
+}
+
+.filter-btn.active {
+  background: var(--rust);
+  border-color: var(--rust);
+  color: var(--warm-white);
+  font-weight: 600;
+}
+
+/* ---- RICH QUEEN TOOLTIP ---- */
+.queen-tooltip {
+  position: fixed;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  min-width: 200px;
+  max-width: 240px;
+}
+
+.queen-tooltip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.queen-tooltip-inner {
+  background: var(--ink);
+  border: 1px solid rgba(201,168,76,0.3);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+.queen-tooltip-header {
+  background: linear-gradient(135deg, var(--rust), #a04535);
+  padding: 0.7rem 1rem 0.5rem;
+}
+
+.queen-tooltip-name {
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  font-weight: 700;
+  font-style: italic;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.queen-tooltip-body {
+  padding: 0.7rem 1rem;
+}
+
+.queen-tooltip-book {
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-style: italic;
+  color: var(--gold-light);
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.queen-tooltip-book::before {
+  content: '📖 ';
+}
+
+.queen-tooltip-weeks {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--gold);
+  line-height: 1;
+}
+
+.queen-tooltip-weeks span {
+  font-size: 0.75rem;
+  font-weight: 400;
+  font-family: var(--font-body);
+  color: #9e8f7c;
+  margin-left: 4px;
+}
+
+.queen-tooltip-decade {
+  font-size: 0.72rem;
+  font-style: italic;
+  color: #6e5f50;
+  margin-top: 0.3rem;
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 768px) {
+  .explosion-layout { grid-template-columns: 1fr; }
+  .sticky-chart-panel { position: relative; top: auto; }
+  .scroll-steps { padding: 2rem 0; gap: 2rem; }
+  .scroll-step { min-height: auto; }
+  .hook-layout,
+  .two-col { grid-template-columns: 1fr; gap: 2rem; }
+  .hook-visual { display: none; }
+  .stats-row { grid-template-columns: 1fr; }
+  .chapter-nav { display: none; }
+  .chapter-number-bg { font-size: 6rem; }
+}
