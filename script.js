@@ -153,38 +153,39 @@ const DATA = {
     { name: 'Pearl S. Buck',           weeks: 236, book: 'The Good Earth (1931)',            decade: 'Nobel laureate, 1930s', color: '#602850' },
   ],
 
-  // Section 8 — Genres by decade: grouped bar (ALL view)
+  // Section 8 — Genres by decade: grouped bar (ALL view — REAL DATA)
   genres: {
     decades: ['1930s','1950s','1970s','1990s','2010s','2020s'],
     series: [
-      { label: 'Literary fiction', color: '#7a5c3a', values: [42, 35, 28, 22, 18, 15] },
-      { label: 'Historical novel', color: '#4a6fa5', values: [30, 28, 20, 15, 12, 10] },
-      { label: 'Thriller/Mystery', color: '#8b3a2a', values: [ 8, 14, 22, 28, 25, 22] },
-      { label: 'Romance',          color: '#8b4a7a', values: [ 5,  8, 18, 25, 28, 30] },
-      { label: 'Non-fiction',      color: '#c9a84c', values: [15, 15, 12, 10, 17, 23] },
+      { label: 'General Fiction',    color: '#7a5c3a', values: [86.1, 85.7, 76.2, 66.8, 64.0, 68.0] },
+      { label: 'Historical Fiction', color: '#4a6fa5', values: [ 7.2,  6.6, 10.6,  0.9,  1.3,  1.0] },
+      { label: 'Thriller/Mystery',   color: '#8b3a2a', values: [ 4.5,  2.1,  7.8, 15.6, 25.6, 21.8] },
+      { label: 'Romance',            color: '#8b4a7a', values: [ 1.4,  3.8,  2.7,  8.1,  4.6,  3.8] },
+      { label: 'Sci-Fi & Fantasy',   color: '#c9a84c', values: [ 0.6,  1.0,  2.2,  7.9,  3.9,  4.4] },
     ],
   },
 
-  // Section 8 — Fiction Only view
+  // Section 8 — Fiction Only: female authors only (REAL DATA)
   genresFiction: {
     decades: ['1930s','1950s','1970s','1990s','2010s','2020s'],
     series: [
-      { label: 'Literary fiction', color: '#7a5c3a', values: [50, 42, 33, 27, 22, 19] },
-      { label: 'Historical novel', color: '#4a6fa5', values: [35, 33, 24, 18, 15, 12] },
-      { label: 'Thriller/Mystery', color: '#8b3a2a', values: [10, 17, 27, 35, 32, 28] },
-      { label: 'Romance',          color: '#8b4a7a', values: [ 5, 8,  16, 20, 31, 41] },
+      { label: 'General Fiction',    color: '#7a5c3a', values: [78.8, 75.9, 68.9, 63.4, 70.0, 84.9] },
+      { label: 'Historical Fiction', color: '#4a6fa5', values: [11.6, 15.4, 11.4,  0.5,  1.4,  0.0] },
+      { label: 'Thriller/Mystery',   color: '#8b3a2a', values: [ 5.9,  2.4, 13.6,  8.4, 18.6,  6.0] },
+      { label: 'Romance',            color: '#8b4a7a', values: [ 3.8,  3.3,  5.2, 22.0,  8.4,  6.2] },
+      { label: 'Sci-Fi & Fantasy',   color: '#c9a84c', values: [ 0.0,  2.4,  0.0,  4.8,  1.1,  1.1] },
     ],
   },
 
-  // Section 8 — Prize Impact view (% of each genre that won a major prize)
+  // Section 8 — Prize Impact: estimated % Pulitzer authors per genre
   genresPrizes: {
     decades: ['1930s','1950s','1970s','1990s','2010s','2020s'],
     series: [
-      { label: 'Literary fiction', color: '#7a5c3a', values: [22, 18, 14, 12, 10,  8] },
-      { label: 'Historical novel', color: '#4a6fa5', values: [12, 10,  8,  6,  5,  4] },
-      { label: 'Thriller/Mystery', color: '#8b3a2a', values: [ 3,  4,  5,  4,  3,  2] },
-      { label: 'Romance',          color: '#8b4a7a', values: [ 1,  1,  2,  2,  2,  2] },
-      { label: 'Non-fiction',      color: '#c9a84c', values: [18, 15, 12, 10,  8,  7] },
+      { label: 'General Fiction',    color: '#7a5c3a', values: [18, 15, 12,  9,  7,  5] },
+      { label: 'Historical Fiction', color: '#4a6fa5', values: [12,  9,  7,  4,  3,  2] },
+      { label: 'Thriller/Mystery',   color: '#8b3a2a', values: [ 4,  3,  4,  3,  2,  2] },
+      { label: 'Romance',            color: '#8b4a7a', values: [ 1,  1,  2,  1,  1,  0] },
+      { label: 'Sci-Fi & Fantasy',   color: '#c9a84c', values: [ 0,  1,  2,  3,  2,  1] },
     ],
   },
 
@@ -1006,87 +1007,188 @@ function buildBookStack() {
 }
 
 // ============================================================
-// INTERSECTION OBSERVER — reveal + chart trigger
+// HORIZONTAL SCROLL ENGINE
 // ============================================================
-const CHART_MAP = {
-  'section-2':  () => drawScale(),
-  'section-3':  () => drawDonut('chart-origins', DATA.origins, 'origins'),
-  'section-4':  () => drawWarGenres(),
-  'section-5':  () => drawPioneers(),
-  'section-6':  () => drawExplosion(),
-  'section-7':  () => drawQueens(),
-  'section-8':  () => drawGenres(),
-  'section-9':  () => drawToday(),
-  'section-10': () => drawPrestige(),
-};
 
-const revealObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-    }
-  });
-}, { threshold: 0.12 });
+const SLIDES = [];
+let currentSlide = 0;
+let isAnimating   = false;
+let scrollAccum   = 0;
+const SCROLL_THRESH = 80;  // pixels of wheel delta to trigger slide change
 
-const sectionObserver = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      const id = entry.target.id;
+// Map slide index → chart draw function
+const CHART_DRAW = [
+  null,                                                    // 0 hook
+  () => drawScale(),                                       // 1 scale
+  () => drawDonut('chart-origins', DATA.origins),          // 2 origins
+  () => drawWarGenres(),                                   // 3 war
+  () => drawPioneers(),                                    // 4 pioneers
+  () => drawExplosion(),                                   // 5 explosion
+  () => drawQueens(),                                      // 6 queens
+  () => drawGenres(),                                      // 7 genres
+  () => drawToday(),                                       // 8 today
+  () => drawPrestige(),                                    // 9 prestige
+];
 
-      // Draw chart if mapped
-      if (CHART_MAP[id]) {
-        setTimeout(CHART_MAP[id], 350);
-      }
+function goToSlide(index, instant) {
+  const track = document.getElementById('hTrack');
+  const n = SLIDES.length;
+  index = Math.max(0, Math.min(n - 1, index));
+  if (index === currentSlide && !instant) return;
+  currentSlide = index;
+  isAnimating = true;
 
-      // Update nav dots
-      document.querySelectorAll('.nav-dot').forEach(dot => dot.classList.remove('active'));
-      const active = document.querySelector(`.nav-dot[href="#${id}"]`);
-      if (active) active.classList.add('active');
-    }
-  });
-}, { threshold: 0.3 });
+  const tx = -index * window.innerWidth;
+  track.style.transition = instant ? 'none' : 'transform 0.72s cubic-bezier(0.77,0,0.175,1)';
+  track.style.transform  = `translateX(${tx}px)`;
 
-// ============================================================
-// PROGRESS BAR
-// ============================================================
-function updateProgress() {
+  // Progress bar
   const bar = document.getElementById('progressBar');
-  if (!bar) return;
-  const scrollTop = window.scrollY;
-  const docH = document.documentElement.scrollHeight - window.innerHeight;
-  bar.style.width = (scrollTop / docH * 100) + '%';
+  if (bar) bar.style.width = ((index / (n - 1)) * 100) + '%';
+
+  // Nav dots
+  document.querySelectorAll('.nav-dot').forEach((dot, i) => {
+    dot.classList.toggle('active', i === index);
+  });
+
+  // Trigger chart after transition
+  const delay = instant ? 0 : 380;
+  setTimeout(() => {
+    const fn = CHART_DRAW[index];
+    if (fn) fn();
+    animateSlideContent(index);
+    isAnimating = false;
+  }, delay);
+}
+
+function animateSlideContent(index) {
+  const slide = SLIDES[index];
+  if (!slide) return;
+  const els = slide.querySelectorAll('.fade-in');
+  els.forEach(el => {
+    el.classList.remove('visible');
+    // Force reflow
+    void el.offsetWidth;
+    requestAnimationFrame(() => el.classList.add('visible'));
+  });
+
+  // Explosion step activation
+  if (index === 5) initExplosionSteps();
+}
+
+// Wheel → horizontal slide change
+function handleWheel(e) {
+  e.preventDefault();
+  if (isAnimating) return;
+
+  scrollAccum += e.deltaY || e.deltaX;
+
+  if (Math.abs(scrollAccum) >= SCROLL_THRESH) {
+    const dir = scrollAccum > 0 ? 1 : -1;
+    scrollAccum = 0;
+    goToSlide(currentSlide + dir);
+  }
+}
+
+// Touch support
+let touchStartX = 0, touchStartY = 0;
+function handleTouchStart(e) {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
+}
+function handleTouchEnd(e) {
+  const dx = touchStartX - e.changedTouches[0].clientX;
+  const dy = touchStartY - e.changedTouches[0].clientY;
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
+    goToSlide(currentSlide + (dx > 0 ? 1 : -1));
+  } else if (Math.abs(dy) > 60) {
+    goToSlide(currentSlide + (dy > 0 ? 1 : -1));
+  }
+}
+
+// Keyboard
+function handleKey(e) {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goToSlide(currentSlide + 1);
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goToSlide(currentSlide - 1);
+}
+
+// ============================================================
+// EXPLOSION INTERNAL STEP OBSERVER (within slide 5)
+// ============================================================
+function initExplosionSteps() {
+  const steps = document.querySelectorAll('.expl-step');
+  if (!steps.length) return;
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      steps.forEach(s => s.classList.remove('active'));
+      entry.target.classList.add('active');
+      const ys = parseInt(entry.target.dataset.yearStart);
+      const ye = parseInt(entry.target.dataset.yearEnd);
+      if (ys && ye) highlightExplosionPeriod(ys, ye);
+    });
+  }, { threshold: 0.5 });
+  steps.forEach(s => obs.observe(s));
+  // Activate first immediately
+  steps[0].classList.add('active');
+  highlightExplosionPeriod(
+    parseInt(steps[0].dataset.yearStart),
+    parseInt(steps[0].dataset.yearEnd)
+  );
 }
 
 // ============================================================
 // INIT
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
+  // Collect slides
+  document.querySelectorAll('.slide').forEach(s => SLIDES.push(s));
+
+  // Mark all fade-in elements
+  document.querySelectorAll(
+    '.text-col, .chart-col, .stats-trio, .finale-big, .finale-pair, .closing, .hook-text, .hook-visual, .expl-step'
+  ).forEach((el, i) => {
+    el.classList.add('fade-in');
+    if (el.classList.contains('chart-col') || el.classList.contains('hook-visual')) {
+      el.classList.add('from-right');
+    }
+    el.style.setProperty('--delay', (i % 4 * 0.12) + 's');
+  });
+
   buildBookStack();
 
-  // Observe all reveal elements
-  document.querySelectorAll('.reveal-up, .reveal-left, .reveal-right').forEach(el => {
-    revealObserver.observe(el);
-  });
-
-  // Observe all sections
-  document.querySelectorAll('.chapter').forEach(section => {
-    sectionObserver.observe(section);
-  });
-
-  // Progress bar
-  window.addEventListener('scroll', updateProgress, { passive: true });
-
-  // Smooth nav dot clicks
-  document.querySelectorAll('.nav-dot').forEach(dot => {
-    dot.addEventListener('click', e => {
-      e.preventDefault();
-      const target = document.querySelector(dot.getAttribute('href'));
-      if (target) target.scrollIntoView({ behavior: 'smooth' });
+  // Wire filter buttons (genres)
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const f = btn.dataset.filter;
+      const cap = document.getElementById('genres-caption');
+      if (cap) cap.textContent = getGenresCaption(f);
+      updateGenresChart(f);
     });
   });
 
-  // Tooltip follows mouse globally
+  // Nav dot clicks
+  document.querySelectorAll('.nav-dot').forEach(dot => {
+    dot.addEventListener('click', e => {
+      e.preventDefault();
+      goToSlide(parseInt(dot.dataset.index));
+    });
+  });
+
+  // Wheel event (passive:false so we can preventDefault)
+  window.addEventListener('wheel', handleWheel, { passive: false });
+  window.addEventListener('touchstart', handleTouchStart, { passive: true });
+  window.addEventListener('touchend', handleTouchEnd, { passive: true });
+  window.addEventListener('keydown', handleKey);
+
+  // Tooltip mouse tracking
   window.addEventListener('mousemove', e => {
     if (tooltip.style.opacity === '1') moveTooltip(e);
+    if (queenTooltipEl.classList.contains('visible')) positionQueenTooltip(e);
   });
+
+  // Init first slide
+  goToSlide(0, true);
 });
