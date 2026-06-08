@@ -20,14 +20,14 @@ const DATA = {
     { decade: '2010s', entries: 7990 },
     { decade: '2020s', entries:  735 },
   ],
-
+ 
   // Section 3 — Origins: 1930s gender split (real: F 35.8%, M 64.2%)
   origins: [
     { label: 'Male authors',   value: 64.2, color: 'var(--male)' },
     { label: 'Female authors', value: 35.8, color: 'var(--female)' },
     { label: 'Unknown/Group',  value:  0.0, color: '#bca98a' },
   ],
-
+ 
   // Section 4 — War genres: placeholder (genre not in dataset yet)
   warGenres: [
     { genre: 'Military history',    pct: 28 },
@@ -37,7 +37,7 @@ const DATA = {
     { genre: 'Historical novel',    pct: 10 },
     { genre: 'Other',               pct:  6 },
   ],
-
+ 
   // Section 5 — Pioneers: real data from Top female sheet (list entries)
   pioneers: [
     { name: 'Frances P. Keyes', weeks: 281 },
@@ -46,7 +46,7 @@ const DATA = {
     { name: 'Daphne Du Maurier',weeks: 317 },
     { name: 'Edna Ferber',      weeks:  94 },
   ],
-
+ 
   // Section 6 — Explosion: real yearly % from by_gender sheet
   explosion: [
     { year: 1931, male: 68.0, female: 32.0 },
@@ -140,7 +140,7 @@ const DATA = {
     { year: 2019, male: 52.9, female: 47.1 },
     { year: 2020, male: 40.3, female: 59.3 },
   ],
-
+ 
   // Section 7 — Queens: real data from Top female sheet (total list appearances)
   queens: [
     { name: 'Danielle Steel',          weeks: 957, book: 'Secrets (1985)',                    decade: 'Dominated 1980s–2010s', color: '#c9a84c' },
@@ -152,7 +152,7 @@ const DATA = {
     { name: 'Frances Parkinson Keyes', weeks: 281, book: "Dinner at Antoine's (1948)",       decade: 'Pioneer, 1930s–50s',    color: '#703862' },
     { name: 'Pearl S. Buck',           weeks: 236, book: 'The Good Earth (1931)',            decade: 'Nobel laureate, 1930s', color: '#602850' },
   ],
-
+ 
   // Section 8 — Genres by decade: grouped bar (ALL view — REAL DATA)
   genres: {
     decades: ['1930s','1950s','1970s','1990s','2010s','2020s'],
@@ -164,7 +164,7 @@ const DATA = {
       { label: 'Sci-Fi & Fantasy',   color: '#c9a84c', values: [ 0.6,  1.0,  2.2,  7.9,  3.9,  4.4] },
     ],
   },
-
+ 
   // Section 8 — Fiction Only: female authors only (REAL DATA)
   genresFiction: {
     decades: ['1930s','1950s','1970s','1990s','2010s','2020s'],
@@ -176,7 +176,7 @@ const DATA = {
       { label: 'Sci-Fi & Fantasy',   color: '#c9a84c', values: [ 0.0,  2.4,  0.0,  4.8,  1.1,  1.1] },
     ],
   },
-
+ 
   // Section 8 — Prize Impact: estimated % Pulitzer authors per genre
   genresPrizes: {
     decades: ['1930s','1950s','1970s','1990s','2010s','2020s'],
@@ -188,14 +188,14 @@ const DATA = {
       { label: 'Sci-Fi & Fantasy',   color: '#c9a84c', values: [ 0,  1,  2,  3,  2,  1] },
     ],
   },
-
+ 
   // Section 9 — Today: real data 2016–2020 (overall list)
   today: [
     { label: 'Female authors',   value: 50.1, color: 'var(--female)' },
     { label: 'Male authors',     value: 49.8, color: 'var(--male)' },
     { label: 'Non-binary/Other', value:  0.1, color: '#bca98a' },
   ],
-
+ 
   // Section 10 — Prestige: real cross-reference NYT list × Pulitzer Fiction winners
   // Female Pulitzer Fiction winners: 23, of which 21 appeared on NYT list (91%)
   // Male Pulitzer Fiction winners:   30, of which 26 appeared on NYT list (87%)
@@ -208,12 +208,12 @@ const DATA = {
     { category: 'Female Pulitzer → on list', pct_prize: 91,   total: 23 },
   ],
 };
-
+ 
 // ---- TOOLTIP ----
 const tooltip = document.createElement('div');
 tooltip.className = 'd3-tooltip';
 document.body.appendChild(tooltip);
-
+ 
 function showTooltip(e, html) {
   tooltip.innerHTML = html;
   tooltip.style.opacity = '1';
@@ -224,7 +224,7 @@ function moveTooltip(e) {
   tooltip.style.top  = (e.clientY - 28) + 'px';
 }
 function hideTooltip() { tooltip.style.opacity = '0'; }
-
+ 
 // ---- COLOUR HELPERS ----
 const C = {
   male:   '#4a6fa5',
@@ -828,8 +828,9 @@ function drawToday() {
   const size = Math.min(el.clientWidth || 320, 320);
   const radius = size / 2 - 20;
 
-  const svg = d3.select(el).append('svg').attr('width', size).attr('height', size)
-    .style('display','block').style('margin','0 auto');
+  const svg = d3.select(el).append('svg')
+    .attr('viewBox', `0 0 ${size} ${size}`).attr('preserveAspectRatio','xMidYMid meet')
+    .style('display','block').style('margin','0 auto').style('width','100%').style('height','auto');
   const g = svg.append('g').attr('transform', `translate(${size/2},${size/2})`);
 
   const pie = d3.pie().value(d=>d.value).sort(null);
@@ -857,6 +858,18 @@ function drawToday() {
   g.append('text').attr('text-anchor','middle').attr('dy','1.4em')
     .style('font-family','Lora,serif').style('font-size','0.7rem').style('font-style','italic')
     .style('fill',C.sepia).text('female, 2016–20');
+
+  // Legend as HTML below SVG to avoid clipping
+  const legendWrap = document.createElement('div');
+  legendWrap.className = 'donut-legend';
+  DATA.today.forEach(d => {
+    const item = document.createElement('div');
+    item.className = 'donut-legend-item';
+    const sw = document.createElement('span'); sw.className = 'donut-swatch'; sw.style.background = d.color;
+    const lbl = document.createElement('span'); lbl.className = 'donut-label'; lbl.textContent = d.label;
+    item.appendChild(sw); item.appendChild(lbl); legendWrap.appendChild(item);
+  });
+  el.appendChild(legendWrap);
 
   const legend = svg.append('g').attr('transform',`translate(${size/2 - 95}, ${size-28})`);
   DATA.today.forEach((d,i) => {
@@ -1007,14 +1020,10 @@ function buildBookStack() {
 }
 
 // ============================================================
-// HORIZONTAL SCROLL ENGINE
+// VERTICAL SCROLL ENGINE & OBSERVER
 // ============================================================
 
 const SLIDES = [];
-let currentSlide = 0;
-let isAnimating   = false;
-let scrollAccum   = 0;
-const SCROLL_THRESH = 80;  // pixels of wheel delta to trigger slide change
 
 // Map slide index → chart draw function
 const CHART_DRAW = [
@@ -1030,87 +1039,52 @@ const CHART_DRAW = [
   () => drawPrestige(),                                    // 9 prestige
 ];
 
-function goToSlide(index, instant) {
-  const track = document.getElementById('hTrack');
-  const n = SLIDES.length;
-  index = Math.max(0, Math.min(n - 1, index));
-  if (index === currentSlide && !instant) return;
-  currentSlide = index;
-  isAnimating = true;
-
-  const tx = -index * window.innerWidth;
-  track.style.transition = instant ? 'none' : 'transform 0.72s cubic-bezier(0.77,0,0.175,1)';
-  track.style.transform  = `translateX(${tx}px)`;
-
-  // Progress bar
+// Progress Bar lligada a l'scroll natiu
+window.addEventListener('scroll', () => {
+  const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+  const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  const scrolled = (winScroll / height) * 100;
   const bar = document.getElementById('progressBar');
-  if (bar) bar.style.width = ((index / (n - 1)) * 100) + '%';
+  if (bar) bar.style.width = scrolled + '%';
+});
 
-  // Nav dots
-  document.querySelectorAll('.nav-dot').forEach((dot, i) => {
-    dot.classList.toggle('active', i === index);
+// Lògica de navegació per fer scroll suau al fer clic als punts
+document.querySelectorAll('.nav-dot').forEach((dot) => {
+  dot.addEventListener('click', (e) => {
+    e.preventDefault();
+    const index = dot.getAttribute('data-index');
+    document.getElementById(`slide-${index}`).scrollIntoView({ behavior: 'smooth' });
   });
+});
 
-  // Trigger chart after transition
-  const delay = instant ? 0 : 380;
-  setTimeout(() => {
-    const fn = CHART_DRAW[index];
-    if (fn) fn();
-    animateSlideContent(index);
-    isAnimating = false;
-  }, delay);
-}
+// Intersection Observer per dibuixar gràfics i animar entrades
+const slideObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const slide = entry.target;
+      const index = parseInt(slide.id.split('-')[1]);
 
-function animateSlideContent(index) {
-  const slide = SLIDES[index];
-  if (!slide) return;
-  const els = slide.querySelectorAll('.fade-in');
-  els.forEach(el => {
-    el.classList.remove('visible');
-    // Force reflow
-    void el.offsetWidth;
-    requestAnimationFrame(() => el.classList.add('visible'));
+      // Actualitzar punts de navegació
+      document.querySelectorAll('.nav-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === index);
+      });
+
+      // Dibuixar gràfic si existeix per aquesta slide
+      if (CHART_DRAW[index]) CHART_DRAW[index]();
+
+      // Animar elements "fade-in"
+      const els = slide.querySelectorAll('.fade-in');
+      els.forEach(el => {
+        if (!el.classList.contains('visible')) {
+          el.classList.add('visible');
+        }
+      });
+
+      // Activar passos del gràfic d'explosió (slide 5)
+      if (index === 5) initExplosionSteps();
+    }
   });
-
-  // Explosion step activation
-  if (index === 5) initExplosionSteps();
-}
-
-// Wheel → horizontal slide change
-function handleWheel(e) {
-  e.preventDefault();
-  if (isAnimating) return;
-
-  scrollAccum += e.deltaY || e.deltaX;
-
-  if (Math.abs(scrollAccum) >= SCROLL_THRESH) {
-    const dir = scrollAccum > 0 ? 1 : -1;
-    scrollAccum = 0;
-    goToSlide(currentSlide + dir);
-  }
-}
-
-// Touch support
-let touchStartX = 0, touchStartY = 0;
-function handleTouchStart(e) {
-  touchStartX = e.touches[0].clientX;
-  touchStartY = e.touches[0].clientY;
-}
-function handleTouchEnd(e) {
-  const dx = touchStartX - e.changedTouches[0].clientX;
-  const dy = touchStartY - e.changedTouches[0].clientY;
-  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 40) {
-    goToSlide(currentSlide + (dx > 0 ? 1 : -1));
-  } else if (Math.abs(dy) > 60) {
-    goToSlide(currentSlide + (dy > 0 ? 1 : -1));
-  }
-}
-
-// Keyboard
-function handleKey(e) {
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goToSlide(currentSlide + 1);
-  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   goToSlide(currentSlide - 1);
-}
+}, { threshold: 0.3 }); // S'activa quan un 30% de la slide és visible
 
 // ============================================================
 // EXPLOSION INTERNAL STEP OBSERVER (within slide 5)
@@ -1141,8 +1115,12 @@ function initExplosionSteps() {
 // INIT
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
-  // Collect slides
-  document.querySelectorAll('.slide').forEach(s => SLIDES.push(s));
+  // Collect slides and start observing them for entry
+  document.querySelectorAll('.slide').forEach((s, i) => {
+    SLIDES.push(s);
+    if (!s.id) s.id = `slide-${i}`;
+    slideObserver.observe(s);
+  });
 
   // Mark all fade-in elements
   document.querySelectorAll(
@@ -1169,26 +1147,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Nav dot clicks
+  // Nav dot clicks -> scroll to slide
   document.querySelectorAll('.nav-dot').forEach(dot => {
     dot.addEventListener('click', e => {
       e.preventDefault();
-      goToSlide(parseInt(dot.dataset.index));
+      const idx = parseInt(dot.dataset.index);
+      const target = document.getElementById(`slide-${idx}`);
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
     });
   });
 
-  // Wheel event (passive:false so we can preventDefault)
-  window.addEventListener('wheel', handleWheel, { passive: false });
-  window.addEventListener('touchstart', handleTouchStart, { passive: true });
-  window.addEventListener('touchend', handleTouchEnd, { passive: true });
-  window.addEventListener('keydown', handleKey);
-
   // Tooltip mouse tracking
   window.addEventListener('mousemove', e => {
-    if (tooltip.style.opacity === '1') moveTooltip(e);
-    if (queenTooltipEl.classList.contains('visible')) positionQueenTooltip(e);
+    if (tooltip && tooltip.style && tooltip.style.opacity === '1') moveTooltip(e);
+    if (queenTooltipEl && queenTooltipEl.classList.contains('visible')) positionQueenTooltip(e);
   });
-
-  // Init first slide
-  goToSlide(0, true);
 });

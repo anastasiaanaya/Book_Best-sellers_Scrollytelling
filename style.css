@@ -18,8 +18,8 @@
   --rust-light:   #c4624a;
   --gold:         #c9a84c;
   --gold-light:   #e8c97a;
-  --male:         #4a6fa5;
-  --male-light:   #7a9fc5;
+  --male:         #c8b3e6; /* lila clar reemplaça blau */
+  --male-light:   #e6ddf8; /* tocat més clar per accents */
   --female:       #8b4a7a;
   --female-light: #b87aaa;
 
@@ -33,12 +33,12 @@
 
 html, body {
   width: 100%; height: 100%;
-  overflow: hidden; /* body doesn't scroll — JS hijacks */
+  overflow-x: hidden; /* Evitem l'scroll horitzontal */
+  overflow-y: auto;   /* Activem l'scroll vertical natiu */
   background: var(--cream);
   color: var(--ink);
   font-family: var(--font-body);
   line-height: 1.75;
-  cursor: default;
 }
 
 /* Scrollbar hidden but functional on h-track */
@@ -52,6 +52,12 @@ html, body {
   z-index: 1000;
   transition: width 0.15s linear;
 }
+
+/* Donut legend (HTML) */
+.donut-legend { display:flex; gap:12px; justify-content:center; align-items:center; margin-top:0.6rem; flex-wrap:wrap; }
+.donut-legend-item { display:flex; gap:8px; align-items:center; font-family: Lora, serif; color: var(--sepia); font-size: 0.9rem; }
+.donut-swatch { width:12px; height:12px; border-radius:2px; display:inline-block; flex: 0 0 12px; }
+.donut-label { display:inline-block; white-space:nowrap; }
 
 /* ---- NAV DOTS ---- */
 .chapter-nav {
@@ -78,21 +84,13 @@ html, body {
   background: var(--rust); border-color: var(--rust); transform: scale(1.4) translate(-1px,-1px);
 }
 
-/* ---- HORIZONTAL TRACK ---- */
-.h-track {
-  display: flex;
-  width: fit-content;       /* as wide as all slides */
-  height: 100vh;
-  will-change: transform;
-  transform: translateX(0);
-  transition: transform 0s; /* JS controls this directly */
-}
+/* (Removed horizontal track — slides flow vertically) */
 
 /* ---- SLIDES ---- */
 .slide {
   position: relative;
-  width: var(--slide-w);
-  height: var(--slide-h);
+  width: 100vw;
+  min-height: 100vh; /* Canviat per evitar talls en pantalles petites */
   flex-shrink: 0;
   overflow: hidden;
   display: flex;
@@ -110,6 +108,26 @@ html, body {
 .slide[data-theme="light"]  { background: var(--warm-white); }
 .slide[data-theme="dark"]   { background: var(--ink); color: var(--cream); }
 .slide[data-theme="finale"] { background: var(--ink-light); color: var(--cream); }
+
+/* NOU TEMA: Lila Clar (alt contrast) */
+.slide[data-theme="lila-clar"] { background: #ede8f5; color: var(--ink); }
+.slide[data-theme="lila-clar"] h2 { color: var(--ink); }
+.slide[data-theme="lila-clar"] .body-text { color: var(--ink-light); }
+.slide[data-theme="lila-clar"] .chart-caption { color: var(--sepia); }
+.slide[data-theme="lila-clar"] .chapter-eyebrow { color: var(--female); }
+.slide[data-theme="lila-clar"] .stat-desc { color: var(--ink-light); }
+.slide[data-theme="lila-clar"] .stat-number { color: var(--female); }
+.slide[data-theme="lila-clar"] .inline-stat .i-num { color: var(--female); }
+.slide[data-theme="lila-clar"] .inline-stat .i-desc { color: var(--sepia); }
+.slide[data-theme="lila-clar"] .pull-quote {
+  border-left-color: var(--female); color: var(--ink-light);
+  background: rgba(139, 74, 122, 0.07);
+}
+.slide[data-theme="lila-clar"] .chart-box { 
+  background: rgba(255,255,255,0.7); 
+  border-color: rgba(139, 74, 122, 0.2); 
+}
+.slide[data-theme="lila-clar"] .pioneer-name { color: var(--ink); }
 
 /* dark theme text tweaks */
 .slide[data-theme="dark"] h2,
