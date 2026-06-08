@@ -18,6 +18,15 @@ This interactive narrative explores the deep inequalities of early literary esta
 - **Vanilla JavaScript:** Native Intersection Observers for scroll-driven animations and event handling.
 - **D3.js (v7):** For binding data and creating all SVG-based data visualizations.
 
+## Project Structure
+
+```bash
+├── index.html       # Structural DOM tree and chapter slide layout
+├── style.css        # Layouts, typographical scales, responsive grids, tokens
+├── script.js       # Core D3.js chart generation logic, engine, and dataset payload
+└── README.md        # Documentation and details
+```
+
 ## Data Source
 
 Data compiled and analyzed from the historical **New York Times Bestseller List Archive (1931–2024)**, cross-referenced with Pulitzer Prize records. Over 60,000 entries across 7,431 unique titles were processed for this visualization.

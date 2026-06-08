@@ -158,7 +158,7 @@ const DATA = {
     decades: ['1930s','1950s','1970s','1990s','2010s','2020s'],
     series: [
       { label: 'General Fiction',    color: '#7a5c3a', values: [86.1, 85.7, 76.2, 66.8, 64.0, 68.0] },
-      { label: 'Historical Fiction', color: '#4a6fa5', values: [ 7.2,  6.6, 10.6,  0.9,  1.3,  1.0] },
+      { label: 'Historical Fiction', color: '#c8b3e6', values: [ 7.2,  6.6, 10.6,  0.9,  1.3,  1.0] },
       { label: 'Thriller/Mystery',   color: '#8b3a2a', values: [ 4.5,  2.1,  7.8, 15.6, 25.6, 21.8] },
       { label: 'Romance',            color: '#8b4a7a', values: [ 1.4,  3.8,  2.7,  8.1,  4.6,  3.8] },
       { label: 'Sci-Fi & Fantasy',   color: '#c9a84c', values: [ 0.6,  1.0,  2.2,  7.9,  3.9,  4.4] },
@@ -170,7 +170,7 @@ const DATA = {
     decades: ['1930s','1950s','1970s','1990s','2010s','2020s'],
     series: [
       { label: 'General Fiction',    color: '#7a5c3a', values: [78.8, 75.9, 68.9, 63.4, 70.0, 84.9] },
-      { label: 'Historical Fiction', color: '#4a6fa5', values: [11.6, 15.4, 11.4,  0.5,  1.4,  0.0] },
+      { label: 'Historical Fiction', color: '#c8b3e6', values: [11.6, 15.4, 11.4,  0.5,  1.4,  0.0] },
       { label: 'Thriller/Mystery',   color: '#8b3a2a', values: [ 5.9,  2.4, 13.6,  8.4, 18.6,  6.0] },
       { label: 'Romance',            color: '#8b4a7a', values: [ 3.8,  3.3,  5.2, 22.0,  8.4,  6.2] },
       { label: 'Sci-Fi & Fantasy',   color: '#c9a84c', values: [ 0.0,  2.4,  0.0,  4.8,  1.1,  1.1] },
@@ -182,7 +182,7 @@ const DATA = {
     decades: ['1930s','1950s','1970s','1990s','2010s','2020s'],
     series: [
       { label: 'General Fiction',    color: '#7a5c3a', values: [18, 15, 12,  9,  7,  5] },
-      { label: 'Historical Fiction', color: '#4a6fa5', values: [12,  9,  7,  4,  3,  2] },
+      { label: 'Historical Fiction', color: '#c8b3e6', values: [12,  9,  7,  4,  3,  2] },
       { label: 'Thriller/Mystery',   color: '#8b3a2a', values: [ 4,  3,  4,  3,  2,  2] },
       { label: 'Romance',            color: '#8b4a7a', values: [ 1,  1,  2,  1,  1,  0] },
       { label: 'Sci-Fi & Fantasy',   color: '#c9a84c', values: [ 0,  1,  2,  3,  2,  1] },
@@ -428,64 +428,7 @@ function drawPioneers() {
 }
 
 // ---- SECTION 6: Area chart (explosion) ----
-function drawExplosion() {
-  const el = document.getElementById('chart-explosion');
-  if (!el || el.dataset.drawn) return;
-  el.dataset.drawn = '1';
-
-  const W = el.clientWidth || 700, H = 340;
-  const margin = { top: 20, right: 30, bottom: 40, left: 45 };
-  const w = W - margin.left - margin.right;
-  const h = H - margin.top - margin.bottom;
-
-  const svg = d3.select(el).append('svg').attr('width', W).attr('height', H).style('overflow','visible');
-    const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`).style('overflow','visible');
-
-  const x = d3.scaleLinear().domain([1931, 2024]).range([0, w]);
-  const y = d3.scaleLinear().domain([0, 100]).range([h, 0]);
-
-  const areaM = d3.area().x(d => x(d.year)).y0(d => y(d.female)).y1(d => y(100)).curve(d3.curveBasis);
-  const areaF = d3.area().x(d => x(d.year)).y0(h).y1(d => y(d.female)).curve(d3.curveBasis);
-  const lineF = d3.line().x(d => x(d.year)).y(d => y(d.female)).curve(d3.curveBasis);
-
-  // Gradient female
-  const defs = svg.append('defs');
-  const gradF = defs.append('linearGradient').attr('id', 'gradFemale').attr('gradientUnits', 'userSpaceOnUse').attr('x1',0).attr('x2',w).attr('y1',0).attr('y2',0);
-  gradF.append('stop').attr('offset','0%').attr('stop-color',C.female).attr('stop-opacity',0.5);
-  gradF.append('stop').attr('offset','100%').attr('stop-color',C.female).attr('stop-opacity',0.85);
-  const gradM = defs.append('linearGradient').attr('id', 'gradMale').attr('gradientUnits', 'userSpaceOnUse').attr('x1',0).attr('x2',w).attr('y1',0).attr('y2',0);
-  gradM.append('stop').attr('offset','0%').attr('stop-color',C.male).attr('stop-opacity',0.7);
-  gradM.append('stop').attr('offset','100%').attr('stop-color',C.male).attr('stop-opacity',0.3);
-
-  g.append('path').datum(DATA.explosion).attr('fill','url(#gradMale)').attr('d', areaM);
-  g.append('path').datum(DATA.explosion).attr('fill','url(#gradFemale)').attr('d', areaF);
-
-  // Dividing line
-  const path = g.append('path').datum(DATA.explosion).attr('fill','none')
-    .attr('stroke','rgba(255,255,255,0.8)').attr('stroke-width',2).attr('d', lineF);
-  const totalLen = path.node().getTotalLength();
-  path.attr('stroke-dasharray', totalLen).attr('stroke-dashoffset', totalLen)
-    .transition().duration(2000).delay(200).attr('stroke-dashoffset', 0);
-
-  // Cross annotation (~1978)
-  g.append('line').attr('x1', x(1978)).attr('x2', x(1978)).attr('y1', 0).attr('y2', h)
-    .attr('stroke', C.gold).attr('stroke-width', 1.5).attr('stroke-dasharray', '4,4');
-  g.append('text').attr('x', x(1978) + 6).attr('y', 20)
-    .style('font-family', 'Lora, serif').style('font-size', '10px').style('font-style', 'italic')
-    .style('fill', C.gold).text('Lines cross ~1978');
-
-  // Labels
-  g.append('text').attr('x', x(1940)).attr('y', y(85))
-    .style('font-family','Playfair Display, serif').style('font-size','13px').style('font-weight','700')
-    .style('fill','rgba(255,255,255,0.85)').text('Male');
-  g.append('text').attr('x', x(2000)).attr('y', y(25))
-    .style('font-family','Playfair Display, serif').style('font-size','13px').style('font-weight','700')
-    .style('fill','rgba(255,255,255,0.9)').text('Female');
-
-  // Axes
-  g.append('g').attr('class','d3-axis').attr('transform',`translate(0,${h})`).call(d3.axisBottom(x).tickFormat(d3.format('d')).ticks(10)).select('.domain').remove();
-  g.append('g').attr('class','d3-axis').call(d3.axisLeft(y).ticks(5).tickFormat(d => d+'%')).select('.domain').remove();
-}
+// Duplicate/old drawExplosion removed (kept canonical implementation later in file)
 
 // ---- SECTION 7: Horizontal ranked bar (queens) with RICH TOOLTIPS ----
 const queenTooltipEl = (() => {
@@ -832,7 +775,6 @@ function setupExplosionScrollSteps() {
 }
 
 // (duplicate drawExplosion removed — canonical version defined later)
-}
 
 // ---- SECTION 10: Prestige grouped bar ----
 function drawPrestige() {
@@ -946,7 +888,7 @@ function buildBookStack() {
 
   const books = [
     { color:'#c4624a', title:'Gone Girl', w:150, h:210, r:-8,  l:30,  b:0 },
-    { color:'#4a6fa5', title:'The Road',  w:145, h:205, r: 4,  l:20,  b:18 },
+    { color:'#c8b3e6', title:'The Road',  w:145, h:205, r: 4,  l:20,  b:18 },
     { color:'#8b4a7a', title:'Big Magic', w:155, h:215, r:-3,  l:35,  b:36 },
     { color:'#7a5c3a', title:'Pachinko',  w:148, h:208, r: 7,  l:18,  b:52 },
     { color:'#c9a84c', title:'Beloved',   w:152, h:218, r:-5,  l:28,  b:68 },

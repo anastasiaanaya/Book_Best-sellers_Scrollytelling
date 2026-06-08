@@ -18,8 +18,8 @@
   --rust-light:   #c4624a;
   --gold:         #c9a84c;
   --gold-light:   #e8c97a;
-  --male:         #c8b3e6; /* lila clar */
-  --male-light:   #e9e0f8; /* tocat més clar */
+  --male:         #4a6fa5; /* blue */
+  --lila-clar:    #a15ec9; 
   --female:       #8b4a7a;
   --female-light: #b87aaa;
 
@@ -98,13 +98,15 @@ html, body {
 }
 
 /* themes */
-.slide[data-theme="warm"]   { background: var(--cream); }
-.slide[data-theme="light"]  { background: var(--warm-white); }
+.slide[data-theme="warm"]   { background: #efe6dc; }
+.slide[data-theme="light"]  { background: #f3eadf; }
 .slide[data-theme="dark"]   { background: var(--ink); color: var(--cream); }
 .slide[data-theme="finale"] { background: var(--ink-light); color: var(--cream); }
 
 /* NOU TEMA: Lila Clar (alt contrast) */
-.slide[data-theme="lila-clar"] { background: #ede8f5; color: var(--ink); }
+.lide-clar-fix {}
+.slide[data-theme="lila-clar"] { background: #a15ec9 !important; color: var(--ink) !important; background-image: none !important; }
+.slide[data-theme="lila-clar"] .paper-texture { opacity: 0.03 !important; }
 .slide[data-theme="lila-clar"] h2 { color: var(--ink); }
 .slide[data-theme="lila-clar"] .body-text { color: var(--ink-light); }
 .slide[data-theme="lila-clar"] .chart-caption { color: var(--sepia); }
