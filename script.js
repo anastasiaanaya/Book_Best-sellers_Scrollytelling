@@ -4,9 +4,19 @@
    Animations: Intersection Observer
    ============================================ */
 
+/*
+  Overview:
+  - This script builds all D3-driven charts and interactive UI elements for the scrollytelling.
+  - Charts are drawn lazily: each section's chart is created when the section enters view.
+  - Many helper functions below handle tooltips, small DOM widgets (book stack), and
+    scroll-driven interactions (e.g., the explosion area chart highlighting).
+  - DATA at the top is placeholder/simulated data used for visual development — replace
+    with real dataset loading logic when ready.
+*/
+
 // ---- REAL DATA from NYT Bestseller Archive (DATAsets.xlsx) ----
 const DATA = {
-
+ 
   // Section 2 — Scale: total entries per decade (real data)
   scale: [
     { decade: '1930s', entries: 2598 },
@@ -158,7 +168,7 @@ const DATA = {
     decades: ['1930s','1950s','1970s','1990s','2010s','2020s'],
     series: [
       { label: 'General Fiction',    color: '#7a5c3a', values: [86.1, 85.7, 76.2, 66.8, 64.0, 68.0] },
-      { label: 'Historical Fiction', color: '#c8b3e6', values: [ 7.2,  6.6, 10.6,  0.9,  1.3,  1.0] },
+      { label: 'Historical Fiction', color: '#4a6fa5', values: [ 7.2,  6.6, 10.6,  0.9,  1.3,  1.0] },
       { label: 'Thriller/Mystery',   color: '#8b3a2a', values: [ 4.5,  2.1,  7.8, 15.6, 25.6, 21.8] },
       { label: 'Romance',            color: '#8b4a7a', values: [ 1.4,  3.8,  2.7,  8.1,  4.6,  3.8] },
       { label: 'Sci-Fi & Fantasy',   color: '#c9a84c', values: [ 0.6,  1.0,  2.2,  7.9,  3.9,  4.4] },
@@ -170,7 +180,7 @@ const DATA = {
     decades: ['1930s','1950s','1970s','1990s','2010s','2020s'],
     series: [
       { label: 'General Fiction',    color: '#7a5c3a', values: [78.8, 75.9, 68.9, 63.4, 70.0, 84.9] },
-      { label: 'Historical Fiction', color: '#c8b3e6', values: [11.6, 15.4, 11.4,  0.5,  1.4,  0.0] },
+      { label: 'Historical Fiction', color: '#4a6fa5', values: [11.6, 15.4, 11.4,  0.5,  1.4,  0.0] },
       { label: 'Thriller/Mystery',   color: '#8b3a2a', values: [ 5.9,  2.4, 13.6,  8.4, 18.6,  6.0] },
       { label: 'Romance',            color: '#8b4a7a', values: [ 3.8,  3.3,  5.2, 22.0,  8.4,  6.2] },
       { label: 'Sci-Fi & Fantasy',   color: '#c9a84c', values: [ 0.0,  2.4,  0.0,  4.8,  1.1,  1.1] },
@@ -182,7 +192,7 @@ const DATA = {
     decades: ['1930s','1950s','1970s','1990s','2010s','2020s'],
     series: [
       { label: 'General Fiction',    color: '#7a5c3a', values: [18, 15, 12,  9,  7,  5] },
-      { label: 'Historical Fiction', color: '#c8b3e6', values: [12,  9,  7,  4,  3,  2] },
+      { label: 'Historical Fiction', color: '#4a6fa5', values: [12,  9,  7,  4,  3,  2] },
       { label: 'Thriller/Mystery',   color: '#8b3a2a', values: [ 4,  3,  4,  3,  2,  2] },
       { label: 'Romance',            color: '#8b4a7a', values: [ 1,  1,  2,  1,  1,  0] },
       { label: 'Sci-Fi & Fantasy',   color: '#c9a84c', values: [ 0,  1,  2,  3,  2,  1] },
@@ -238,6 +248,12 @@ const C = {
 // CHART BUILDERS
 // ============================================================
 
+/*
+  CHART_MAP: maps section ids to the function that draws that section's chart.
+  The `sectionObserver` (below) calls the mapped function after a short delay
+  when a section becomes visible, which avoids drawing everything at once.
+*/
+
 // ---- SECTION 2: Growing Bar Chart (scale) ----
 function drawScale() {
   const el = document.getElementById('chart-scale');
@@ -250,7 +266,8 @@ function drawScale() {
   const h = H - margin.top - margin.bottom;
 
   const svg = d3.select(el).append('svg')
-    .attr('viewBox', `0 0 ${W} ${H}`).attr('width','100%').attr('height','auto').style('overflow','visible');
+    .attr('width', W).attr('height', H)
+    .style('overflow', 'visible');
 
   const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
 
@@ -299,8 +316,8 @@ function drawDonut(containerId, data, title) {
   const radius = size / 2 - 20;
 
   const svg = d3.select(el).append('svg')
-    .attr('viewBox', `0 0 ${size} ${size}`).attr('width', '100%').attr('height', 'auto')
-    .style('display', 'block').style('margin', '0 auto').style('overflow','visible');
+    .attr('width', size).attr('height', size)
+    .style('display', 'block').style('margin', '0 auto');
 
   const g = svg.append('g').attr('transform', `translate(${size/2},${size/2})`);
 
@@ -355,8 +372,8 @@ function drawWarGenres() {
   const w = W - margin.left - margin.right;
   const h = H - margin.top - margin.bottom;
 
-  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width','100%').attr('height','auto').style('overflow','visible');
-    const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`).style('overflow','visible');
+  const svg = d3.select(el).append('svg').attr('width', W).attr('height', H);
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
 
   const y = d3.scaleBand().domain(DATA.warGenres.map(d => d.genre)).range([0, h]).padding(0.3);
   const x = d3.scaleLinear().domain([0, 35]).range([0, w]);
@@ -391,12 +408,11 @@ function drawPioneers() {
   const w = W - margin.left - margin.right;
   const h = H - margin.top - margin.bottom;
 
-  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width','100%').attr('height','auto').style('overflow','visible');
+  const svg = d3.select(el).append('svg').attr('width', W).attr('height', H);
   const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
 
   const y = d3.scaleBand().domain(DATA.pioneers.map(d => d.name)).range([0, h]).padding(0.4);
-  const maxWeeks = d3.max(DATA.pioneers, d => d.weeks) || 60;
-  const x = d3.scaleLinear().domain([0, Math.ceil(maxWeeks * 1.05)]).range([0, w]);
+  const x = d3.scaleLinear().domain([0, 60]).range([0, w]);
 
   // Lines
   g.selectAll('.lollipop-line').data(DATA.pioneers).enter().append('line')
@@ -428,7 +444,64 @@ function drawPioneers() {
 }
 
 // ---- SECTION 6: Area chart (explosion) ----
-// Duplicate/old drawExplosion removed (kept canonical implementation later in file)
+function drawExplosion() {
+  const el = document.getElementById('chart-explosion');
+  if (!el || el.dataset.drawn) return;
+  el.dataset.drawn = '1';
+
+  const W = el.clientWidth || 700, H = 340;
+  const margin = { top: 20, right: 30, bottom: 40, left: 45 };
+  const w = W - margin.left - margin.right;
+  const h = H - margin.top - margin.bottom;
+
+  const svg = d3.select(el).append('svg').attr('width', W).attr('height', H).style('overflow','visible');
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const x = d3.scaleLinear().domain([1931, 2024]).range([0, w]);
+  const y = d3.scaleLinear().domain([0, 100]).range([h, 0]);
+
+  const areaM = d3.area().x(d => x(d.year)).y0(d => y(d.female)).y1(d => y(100)).curve(d3.curveBasis);
+  const areaF = d3.area().x(d => x(d.year)).y0(h).y1(d => y(d.female)).curve(d3.curveBasis);
+  const lineF = d3.line().x(d => x(d.year)).y(d => y(d.female)).curve(d3.curveBasis);
+
+  // Gradient female
+  const defs = svg.append('defs');
+  const gradF = defs.append('linearGradient').attr('id', 'gradFemale').attr('gradientUnits', 'userSpaceOnUse').attr('x1',0).attr('x2',w).attr('y1',0).attr('y2',0);
+  gradF.append('stop').attr('offset','0%').attr('stop-color',C.female).attr('stop-opacity',0.5);
+  gradF.append('stop').attr('offset','100%').attr('stop-color',C.female).attr('stop-opacity',0.85);
+  const gradM = defs.append('linearGradient').attr('id', 'gradMale').attr('gradientUnits', 'userSpaceOnUse').attr('x1',0).attr('x2',w).attr('y1',0).attr('y2',0);
+  gradM.append('stop').attr('offset','0%').attr('stop-color',C.male).attr('stop-opacity',0.7);
+  gradM.append('stop').attr('offset','100%').attr('stop-color',C.male).attr('stop-opacity',0.3);
+
+  g.append('path').datum(DATA.explosion).attr('fill','url(#gradMale)').attr('d', areaM);
+  g.append('path').datum(DATA.explosion).attr('fill','url(#gradFemale)').attr('d', areaF);
+
+  // Dividing line
+  const path = g.append('path').datum(DATA.explosion).attr('fill','none')
+    .attr('stroke','rgba(255,255,255,0.8)').attr('stroke-width',2).attr('d', lineF);
+  const totalLen = path.node().getTotalLength();
+  path.attr('stroke-dasharray', totalLen).attr('stroke-dashoffset', totalLen)
+    .transition().duration(2000).delay(200).attr('stroke-dashoffset', 0);
+
+  // Cross annotation (~1978)
+  g.append('line').attr('x1', x(1978)).attr('x2', x(1978)).attr('y1', 0).attr('y2', h)
+    .attr('stroke', C.gold).attr('stroke-width', 1.5).attr('stroke-dasharray', '4,4');
+  g.append('text').attr('x', x(1978) + 6).attr('y', 20)
+    .style('font-family', 'Lora, serif').style('font-size', '10px').style('font-style', 'italic')
+    .style('fill', C.gold).text('Lines cross ~1978');
+
+  // Labels
+  g.append('text').attr('x', x(1940)).attr('y', y(85))
+    .style('font-family','Playfair Display, serif').style('font-size','13px').style('font-weight','700')
+    .style('fill','rgba(255,255,255,0.85)').text('Male');
+  g.append('text').attr('x', x(2000)).attr('y', y(25))
+    .style('font-family','Playfair Display, serif').style('font-size','13px').style('font-weight','700')
+    .style('fill','rgba(255,255,255,0.9)').text('Female');
+
+  // Axes
+  g.append('g').attr('class','d3-axis').attr('transform',`translate(0,${h})`).call(d3.axisBottom(x).tickFormat(d3.format('d')).ticks(10)).select('.domain').remove();
+  g.append('g').attr('class','d3-axis').call(d3.axisLeft(y).ticks(5).tickFormat(d => d+'%')).select('.domain').remove();
+}
 
 // ---- SECTION 7: Horizontal ranked bar (queens) with RICH TOOLTIPS ----
 const queenTooltipEl = (() => {
@@ -480,8 +553,8 @@ function drawQueens() {
 
   const sorted = [...DATA.queens].sort((a,b) => b.weeks - a.weeks);
 
-  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width','100%').attr('height','auto').style('overflow','visible');
-  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`).style('overflow','visible');
+  const svg = d3.select(el).append('svg').attr('width', W).attr('height', H);
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
 
   const y = d3.scaleBand().domain(sorted.map(d => d.name)).range([0, h]).padding(0.28);
   const x = d3.scaleLinear().domain([0, 420]).range([0, w]);
@@ -578,8 +651,8 @@ function renderGenresChart(filter) {
   const w = W - margin.left - margin.right;
   const h = H - margin.top - margin.bottom;
 
-  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width','100%').attr('height','auto').style('overflow','visible').attr('id','genres-svg');
-  const g = svg.append('g').attr('transform',`translate(${margin.left},${margin.top})`).attr('id','genres-g').style('overflow','visible');
+  const svg = d3.select(el).append('svg').attr('width', W).attr('height', H).style('overflow','visible').attr('id','genres-svg');
+  const g = svg.append('g').attr('transform',`translate(${margin.left},${margin.top})`).attr('id','genres-g');
 
   const x0 = d3.scaleBand().domain(decades).range([0,w]).padding(0.25);
   const x1 = d3.scaleBand().domain(series.map(s=>s.label)).range([0, x0.bandwidth()]).padding(0.08);
@@ -633,7 +706,7 @@ function drawExplosion() {
   const h = H - margin.top - margin.bottom;
   explosionChartW = w;
 
-  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width','100%').attr('height','auto').style('overflow','visible').attr('id','explosion-svg');
+  const svg = d3.select(el).append('svg').attr('width', W).attr('height', H).style('overflow','visible').attr('id','explosion-svg');
   const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
 
   const x = d3.scaleLinear().domain([1931, 2024]).range([0, w]);
@@ -674,27 +747,14 @@ function drawExplosion() {
     .attr('stroke','rgba(255,255,255,0.85)').attr('stroke-width',2.5).attr('d', lineF);
   const totalLen = path.node().getTotalLength();
   path.attr('stroke-dasharray', totalLen).attr('stroke-dashoffset', totalLen)
-    .transition().duration(3500).delay(200).attr('stroke-dashoffset', 0);
+    .transition().duration(2000).delay(200).attr('stroke-dashoffset', 0);
 
   // Highlight band (gold vertical band for active period)
   g.append('rect').attr('id','explosion-highlight-band')
     .attr('x', 0).attr('y', 0).attr('width', 0).attr('height', h)
     .attr('fill', 'rgba(201,168,76,0.12)').attr('stroke', C.gold).attr('stroke-width', 1.5)
     .attr('stroke-dasharray','4,3').attr('pointer-events','none').attr('rx', 2)
-    .style('transition','all 0.6s ease');
-
-  // Mousemove interaction: move highlight band to period based on mouse X
-  g.on('mousemove', (event) => {
-    const [mx] = d3.pointer(event, g.node());
-    const year = Math.round(x.invert(mx));
-    const steps = document.querySelectorAll('#section-6 .scroll-step');
-    for (let s of steps) {
-      const ys = parseInt(s.dataset.yearStart);
-      const ye = parseInt(s.dataset.yearEnd);
-      if (ys && ye && year >= ys && year <= ye) { highlightExplosionPeriod(ys, ye); return; }
-    }
-  });
-  g.on('mouseleave', () => { clearExplosionHighlight(); });
+    .style('transition','all 0.5s ease');
 
   // Cross annotation
   g.append('line').attr('x1', x(1978)).attr('x2', x(1978)).attr('y1', 0).attr('y2', h)
@@ -730,15 +790,15 @@ function highlightExplosionPeriod(yearStart, yearEnd) {
   const x2 = explosionXScale(yearEnd);
 
   // Dim left of range
-  d3.select('#explosion-dim-left').transition().duration(900)
+  d3.select('#explosion-dim-left').transition().duration(500)
     .attr('width', Math.max(0, x1));
 
   // Dim right of range
-  d3.select('#explosion-dim-right').transition().duration(900)
+  d3.select('#explosion-dim-right').transition().duration(500)
     .attr('x', x2).attr('width', Math.max(0, explosionChartW - x2));
 
   // Gold highlight band
-  d3.select('#explosion-highlight-band').transition().duration(900)
+  d3.select('#explosion-highlight-band').transition().duration(500)
     .attr('x', x1).attr('width', x2 - x1);
 }
 
@@ -774,7 +834,53 @@ function setupExplosionScrollSteps() {
   steps.forEach(s => stepObserver.observe(s));
 }
 
-// (duplicate drawExplosion removed — canonical version defined later)
+// ---- SECTION 9: Donut today ----
+// reuses drawDonut with different center label
+function drawToday() {
+  const el = document.getElementById('chart-today');
+  if (!el || el.dataset.drawn) return;
+  el.dataset.drawn = '1';
+
+  const size = Math.min(el.clientWidth || 320, 320);
+  const radius = size / 2 - 20;
+
+  const svg = d3.select(el).append('svg').attr('width', size).attr('height', size)
+    .style('display','block').style('margin','0 auto');
+  const g = svg.append('g').attr('transform', `translate(${size/2},${size/2})`);
+
+  const pie = d3.pie().value(d=>d.value).sort(null);
+  const arc = d3.arc().innerRadius(radius*0.55).outerRadius(radius);
+  const arcH = d3.arc().innerRadius(radius*0.55).outerRadius(radius+8);
+
+  const arcs = g.selectAll('path').data(pie(DATA.today)).enter().append('path')
+    .attr('fill', d => d.data.color)
+    .attr('stroke','rgba(255,255,255,0.5)').attr('stroke-width',2)
+    .attr('d', arc)
+    .on('mousemove', (e,d) => showTooltip(e, `<strong>${d.data.label}</strong><br/>${d.data.value}%`))
+    .on('mouseleave', (e,d) => { d3.select(e.currentTarget).attr('d',arc); hideTooltip(); })
+    .on('mouseenter', (e) => d3.select(e.currentTarget).transition().duration(200).attr('d',arcH));
+
+  arcs.attr('d', d => { const s={...d,endAngle:d.startAngle}; return arc(s); })
+    .transition().duration(900).delay((d,i)=>i*200)
+    .attrTween('d', function(d) {
+      const interp = d3.interpolate(d.startAngle+0.001, d.endAngle);
+      return t => { const dd={...d,endAngle:interp(t)}; return arc(dd); };
+    });
+
+  g.append('text').attr('text-anchor','middle').attr('dy','-0.2em')
+    .style('font-family','Playfair Display,serif').style('font-size','2rem').style('font-weight','900')
+    .style('fill','#8b4a7a').text('62%');
+  g.append('text').attr('text-anchor','middle').attr('dy','1.4em')
+    .style('font-family','Lora,serif').style('font-size','0.7rem').style('font-style','italic')
+    .style('fill',C.sepia).text('female, 2020–24');
+
+  const legend = svg.append('g').attr('transform',`translate(${size/2 - 95}, ${size-28})`);
+  DATA.today.forEach((d,i) => {
+    const lg = legend.append('g').attr('transform',`translate(${i*100},0)`);
+    lg.append('rect').attr('width',10).attr('height',10).attr('rx',2).attr('fill',d.color);
+    lg.append('text').attr('x',14).attr('y',9).style('font-family','Lora,serif').style('font-size','9px').style('fill',C.sepia).text(d.label.split(' ')[0]);
+  });
+}
 
 // ---- SECTION 10: Prestige grouped bar ----
 function drawPrestige() {
@@ -782,101 +888,48 @@ function drawPrestige() {
   if (!el || el.dataset.drawn) return;
   el.dataset.drawn = '1';
 
-  const W = el.clientWidth || 620, H = 300;
-  const margin = { top: 30, right: 30, bottom: 75, left: 50 };
+  const W = el.clientWidth || 600, H = 280;
+  const margin = { top: 20, right: 30, bottom: 60, left: 50 };
   const w = W - margin.left - margin.right;
   const h = H - margin.top - margin.bottom;
 
-  // Two groups: "% of bestsellers by Pulitzer authors" and "% of Pulitzer winners who hit the list"
-  const groups = [
-    {
-      label: '% of NYT titles by\nPulitzer authors',
-      bars: [
-        { sub: 'Male', pct: 15.4, color: C.male, n: '4,444 titles' },
-        { sub: 'Female', pct: 16.3, color: C.female, n: '2,974 titles' },
-      ]
-    },
-    {
-      label: '% of Pulitzer Fiction\nwinners on NYT list',
-      bars: [
-        { sub: 'Male', pct: 87, color: C.male, n: '30 winners' },
-        { sub: 'Female', pct: 91, color: C.female, n: '23 winners' },
-      ]
-    }
+  const data = [
+    { label: 'Male bestsellers\nwith major prize', pct: 10, color: C.male },
+    { label: 'Female bestsellers\nwith major prize', pct:  6, color: C.female },
+    { label: 'Male Pulitzer\non list', pct: 38, color: C.male, opacity: 0.5 },
+    { label: 'Female Pulitzer\non list', pct: 28, color: C.female, opacity: 0.5 },
   ];
 
-  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width','100%').attr('height','auto').style('overflow','visible');
+  const svg = d3.select(el).append('svg').attr('width',W).attr('height',H).style('overflow','visible');
   const g = svg.append('g').attr('transform',`translate(${margin.left},${margin.top})`);
 
-  const x0 = d3.scaleBand().domain(groups.map(d=>d.label)).range([0,w]).padding(0.35);
-  const x1 = d3.scaleBand().domain(['Male','Female']).range([0, x0.bandwidth()]).padding(0.1);
-  const y  = d3.scaleLinear().domain([0, 100]).range([h, 0]);
+  const x = d3.scaleBand().domain(data.map(d=>d.label)).range([0,w]).padding(0.3);
+  const y = d3.scaleLinear().domain([0,50]).nice().range([h,0]);
 
-  // Grid
-  g.selectAll('.pg').data(y.ticks(5)).enter().append('line')
-    .attr('x1',0).attr('x2',w).attr('y1',d=>y(d)).attr('y2',d=>y(d))
-    .attr('stroke','rgba(255,255,255,0.07)').attr('stroke-dasharray','3,3');
-
-  // Groups
-  const grpG = g.selectAll('.pgroup').data(groups).enter().append('g')
-    .attr('transform', d => `translate(${x0(d.label)},0)`);
-
-  grpG.selectAll('rect').data(d => d.bars)
-    .enter().append('rect')
-    .attr('x', d => x1(d.sub)).attr('width', x1.bandwidth())
+  g.selectAll('.p-bar').data(data).enter().append('rect')
+    .attr('x', d => x(d.label)).attr('width', x.bandwidth())
     .attr('y', h).attr('height', 0)
-    .attr('fill', d => d.color).attr('rx', 3)
-    .on('mousemove', (e, d) => showTooltip(e, `<strong>${d.sub}</strong><br/>${d.pct}%<br/><span style="font-size:10px;opacity:0.7">${d.n}</span>`))
+    .attr('fill', d => d.color).attr('opacity', d => d.opacity || 1).attr('rx', 3)
+    .on('mousemove', (e,d) => showTooltip(e, `<strong>${d.label.replace('\n',' ')}</strong><br/>${d.pct}%`))
     .on('mouseleave', hideTooltip)
-    .transition().duration(750).delay((d,i) => i*120)
+    .transition().duration(700).delay((d,i)=>i*100)
     .attr('y', d => y(d.pct)).attr('height', d => h - y(d.pct));
 
-  grpG.selectAll('.p-val').data(d => d.bars)
-    .enter().append('text')
-    .attr('x', d => x1(d.sub) + x1.bandwidth()/2)
-    .attr('y', d => y(d.pct) - 7)
+  g.selectAll('.p-label').data(data).enter().append('text')
+    .attr('x', d => x(d.label) + x.bandwidth()/2)
+    .attr('y', d => y(d.pct) - 6)
     .attr('text-anchor','middle')
-    .style('font-family','Playfair Display,serif').style('font-size','14px').style('font-weight','700')
-    .style('fill','#e8c97a')
-    .text(d => d.pct + '%')
-    .style('opacity',0).transition().delay((d,i)=>i*120+400).duration(300).style('opacity',1);
+    .style('font-family','Playfair Display,serif').style('font-size','13px').style('font-weight','700')
+    .style('fill', '#e8c97a').text(d => d.pct + '%');
 
-  // Sub-labels (Male/Female) inside bars
-  grpG.selectAll('.p-sub').data(d => d.bars)
-    .enter().append('text')
-    .attr('x', d => x1(d.sub) + x1.bandwidth()/2)
-    .attr('y', h - 6)
-    .attr('text-anchor','middle')
-    .style('font-family','Lora,serif').style('font-size','10px').style('font-style','italic')
-    .style('fill','rgba(255,255,255,0.55)').text(d => d.sub);
+  // Axis only bottom, custom tick labels
+  const xAxis = g.append('g').attr('class','d3-axis').attr('transform',`translate(0,${h})`).call(d3.axisBottom(x).tickSize(0));
+  xAxis.select('.domain').remove();
+  xAxis.selectAll('text')
+    .style('font-size','9px').style('font-style','italic')
+    .attr('dy','1.2em').text(d => d.split('\n')[0]);
 
-  // Group axis labels (split on \n)
-  g.append('g').attr('class','d3-axis')
-    .attr('transform',`translate(0,${h})`)
-    .call(d3.axisBottom(x0).tickSize(0))
-    .select('.domain').remove();
-
-  g.selectAll('.d3-axis text')
-    .style('font-size','11px').style('font-style','italic')
-    .each(function(d) {
-      const el = d3.select(this);
-      const lines = d.split('\n');
-      el.text(null);
-      lines.forEach((line, i) => {
-        el.append('tspan').attr('x', 0).attr('dy', i === 0 ? '1.2em' : '1.3em').text(line);
-      });
-    });
-
-  g.append('g').attr('class','d3-axis')
-    .call(d3.axisLeft(y).ticks(5).tickFormat(d=>d+'%')).select('.domain').remove();
-
-  // Legend
-  const legend = g.append('g').attr('transform',`translate(${w - 120}, -25)`);
-  [{ label:'Male', color: C.male }, { label:'Female', color: C.female }].forEach((d,i) => {
-    const lg = legend.append('g').attr('transform',`translate(${i*65},0)`);
-    lg.append('rect').attr('width',10).attr('height',10).attr('rx',2).attr('fill',d.color);
-    lg.append('text').attr('x',14).attr('y',9).style('font-family','Lora,serif').style('font-size','10px').style('fill','#9e8f7c').text(d.label);
-  });
+  g.append('g').attr('class','d3-axis').call(d3.axisLeft(y).ticks(5).tickFormat(d=>d+'%')).select('.domain').remove();
 }
 
 // ============================================================
@@ -888,7 +941,7 @@ function buildBookStack() {
 
   const books = [
     { color:'#c4624a', title:'Gone Girl', w:150, h:210, r:-8,  l:30,  b:0 },
-    { color:'#c8b3e6', title:'The Road',  w:145, h:205, r: 4,  l:20,  b:18 },
+    { color:'#4a6fa5', title:'The Road',  w:145, h:205, r: 4,  l:20,  b:18 },
     { color:'#8b4a7a', title:'Big Magic', w:155, h:215, r:-3,  l:35,  b:36 },
     { color:'#7a5c3a', title:'Pachinko',  w:148, h:208, r: 7,  l:18,  b:52 },
     { color:'#c9a84c', title:'Beloved',   w:152, h:218, r:-5,  l:28,  b:68 },
@@ -917,146 +970,98 @@ function buildBookStack() {
 }
 
 // ============================================================
-// VERTICAL SCROLL ENGINE & OBSERVER
+// INTERSECTION OBSERVER — reveal + chart trigger
 // ============================================================
+const CHART_MAP = {
+  'section-2':  () => drawScale(),
+  'section-3':  () => drawDonut('chart-origins', DATA.origins, 'origins'),
+  'section-4':  () => drawWarGenres(),
+  'section-5':  () => drawPioneers(),
+  'section-6':  () => drawExplosion(),
+  'section-7':  () => drawQueens(),
+  'section-8':  () => drawGenres(),
+  'section-9':  () => drawToday(),
+  'section-10': () => drawPrestige(),
+};
 
-const SLIDES = [];
+/*
+  revealObserver: small animation observer that adds `.visible` to elements
+  (elements with classes like `reveal-up`) so CSS transitions reveal them.
 
-// Map slide index → chart draw function
-const CHART_DRAW = [
-  null,                                                    // 0 hook
-  () => drawScale(),                                       // 1 scale
-  () => drawDonut('chart-origins', DATA.origins),          // 2 origins
-  () => drawWarGenres(),                                   // 3 war
-  () => drawPioneers(),                                    // 4 pioneers
-  () => drawExplosion(),                                   // 5 explosion
-  () => drawQueens(),                                      // 6 queens
-  () => drawGenres(),                                      // 7 genres
-  () => drawToday(),                                       // 8 today
-  () => drawPrestige(),                                    // 9 prestige
-];
-
-// Progress Bar lligada a l'scroll natiu
-window.addEventListener('scroll', () => {
-  const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-  const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-  const scrolled = (winScroll / height) * 100;
-  const bar = document.getElementById('progressBar');
-  if (bar) bar.style.width = scrolled + '%';
-});
-
-// Lògica de navegació per fer scroll suau al fer clic als punts
-document.querySelectorAll('.nav-dot').forEach((dot) => {
-  dot.addEventListener('click', (e) => {
-    e.preventDefault();
-    const index = dot.getAttribute('data-index');
-    document.getElementById(`slide-${index}`).scrollIntoView({ behavior: 'smooth' });
-  });
-});
-
-// Intersection Observer per dibuixar gràfics i animar entrades
-const slideObserver = new IntersectionObserver((entries) => {
+  sectionObserver: watches full section elements and triggers chart drawing
+  and nav-dot updates when a chapter enters view.
+*/
+const revealObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
-      const slide = entry.target;
-      const index = parseInt(slide.id.split('-')[1]);
-
-      // Actualitzar punts de navegació
-      document.querySelectorAll('.nav-dot').forEach((dot, i) => {
-        dot.classList.toggle('active', i === index);
-      });
-
-      // Dibuixar gràfic si existeix per aquesta slide
-      if (CHART_DRAW[index]) CHART_DRAW[index]();
-
-      // Animar elements "fade-in"
-      const els = slide.querySelectorAll('.fade-in');
-      els.forEach(el => {
-        if (!el.classList.contains('visible')) {
-          el.classList.add('visible');
-        }
-      });
-
-      // Activar passos del gràfic d'explosió (slide 5)
-      if (index === 5) initExplosionSteps();
+      entry.target.classList.add('visible');
     }
   });
-}, { threshold: 0.3 }); // S'activa quan un 30% de la slide és visible
+}, { threshold: 0.12 });
+
+const sectionObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const id = entry.target.id;
+
+      // Draw chart if mapped
+      if (CHART_MAP[id]) {
+        setTimeout(CHART_MAP[id], 350);
+      }
+
+      // Update nav dots
+      document.querySelectorAll('.nav-dot').forEach(dot => dot.classList.remove('active'));
+      const active = document.querySelector(`.nav-dot[href="#${id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { threshold: 0.3 });
 
 // ============================================================
-// EXPLOSION INTERNAL STEP OBSERVER (within slide 5)
+// PROGRESS BAR
 // ============================================================
-function initExplosionSteps() {
-  const steps = document.querySelectorAll('.expl-step');
-  if (!steps.length) return;
-  const obs = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (!entry.isIntersecting) return;
-      steps.forEach(s => s.classList.remove('active'));
-      entry.target.classList.add('active');
-      const ys = parseInt(entry.target.dataset.yearStart);
-      const ye = parseInt(entry.target.dataset.yearEnd);
-      if (ys && ye) highlightExplosionPeriod(ys, ye);
-    });
-  }, { threshold: 0.5 });
-  steps.forEach(s => obs.observe(s));
-  // Activate first immediately
-  steps[0].classList.add('active');
-  highlightExplosionPeriod(
-    parseInt(steps[0].dataset.yearStart),
-    parseInt(steps[0].dataset.yearEnd)
-  );
+// `updateProgress` updates the thin progress bar at the top of the page
+// based on scroll position. It's bound to the window `scroll` event.
+function updateProgress() {
+  const bar = document.getElementById('progressBar');
+  if (!bar) return;
+  const scrollTop = window.scrollY;
+  const docH = document.documentElement.scrollHeight - window.innerHeight;
+  bar.style.width = (scrollTop / docH * 100) + '%';
 }
 
 // ============================================================
 // INIT
 // ============================================================
+// Initialization: builds the decorative book stack and wires up all observers,
+// navigation, and global tooltip behavior. Runs on `DOMContentLoaded`.
 document.addEventListener('DOMContentLoaded', () => {
-  // Collect slides and start observing them for entry
-  document.querySelectorAll('.slide').forEach((s, i) => {
-    SLIDES.push(s);
-    if (!s.id) s.id = `slide-${i}`;
-    slideObserver.observe(s);
-  });
-
-  // Mark all fade-in elements
-  document.querySelectorAll(
-    '.text-col, .chart-col, .stats-trio, .finale-big, .finale-pair, .closing, .hook-text, .hook-visual, .expl-step'
-  ).forEach((el, i) => {
-    el.classList.add('fade-in');
-    if (el.classList.contains('chart-col') || el.classList.contains('hook-visual')) {
-      el.classList.add('from-right');
-    }
-    el.style.setProperty('--delay', (i % 4 * 0.12) + 's');
-  });
-
   buildBookStack();
 
-  // Wire filter buttons (genres)
-  document.querySelectorAll('.filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const f = btn.dataset.filter;
-      const cap = document.getElementById('genres-caption');
-      if (cap) cap.textContent = getGenresCaption(f);
-      updateGenresChart(f);
-    });
+  // Observe all reveal elements
+  document.querySelectorAll('.reveal-up, .reveal-left, .reveal-right').forEach(el => {
+    revealObserver.observe(el);
   });
 
-  // Nav dot clicks -> scroll to slide
+  // Observe all sections
+  document.querySelectorAll('.chapter').forEach(section => {
+    sectionObserver.observe(section);
+  });
+
+  // Progress bar
+  window.addEventListener('scroll', updateProgress, { passive: true });
+
+  // Smooth nav dot clicks
   document.querySelectorAll('.nav-dot').forEach(dot => {
     dot.addEventListener('click', e => {
       e.preventDefault();
-      const idx = parseInt(dot.dataset.index);
-      const target = document.getElementById(`slide-${idx}`);
+      const target = document.querySelector(dot.getAttribute('href'));
       if (target) target.scrollIntoView({ behavior: 'smooth' });
     });
   });
 
-  // Tooltip mouse tracking
+  // Tooltip follows mouse globally
   window.addEventListener('mousemove', e => {
-    if (tooltip && tooltip.style && tooltip.style.opacity === '1') moveTooltip(e);
-    if (queenTooltipEl && queenTooltipEl.classList.contains('visible')) positionQueenTooltip(e);
+    if (tooltip.style.opacity === '1') moveTooltip(e);
   });
 });
