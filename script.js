@@ -250,8 +250,7 @@ function drawScale() {
   const h = H - margin.top - margin.bottom;
 
   const svg = d3.select(el).append('svg')
-    .attr('width', W).attr('height', H)
-    .style('overflow', 'visible');
+    .attr('viewBox', `0 0 ${W} ${H}`).attr('width','100%').attr('height','auto').style('overflow','visible');
 
   const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
 
@@ -300,8 +299,8 @@ function drawDonut(containerId, data, title) {
   const radius = size / 2 - 20;
 
   const svg = d3.select(el).append('svg')
-    .attr('width', size).attr('height', size)
-    .style('display', 'block').style('margin', '0 auto');
+    .attr('viewBox', `0 0 ${size} ${size}`).attr('width', '100%').attr('height', 'auto')
+    .style('display', 'block').style('margin', '0 auto').style('overflow','visible');
 
   const g = svg.append('g').attr('transform', `translate(${size/2},${size/2})`);
 
@@ -356,8 +355,8 @@ function drawWarGenres() {
   const w = W - margin.left - margin.right;
   const h = H - margin.top - margin.bottom;
 
-  const svg = d3.select(el).append('svg').attr('width', W).attr('height', H);
-  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width','100%').attr('height','auto').style('overflow','visible');
+    const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`).style('overflow','visible');
 
   const y = d3.scaleBand().domain(DATA.warGenres.map(d => d.genre)).range([0, h]).padding(0.3);
   const x = d3.scaleLinear().domain([0, 35]).range([0, w]);
@@ -392,11 +391,12 @@ function drawPioneers() {
   const w = W - margin.left - margin.right;
   const h = H - margin.top - margin.bottom;
 
-  const svg = d3.select(el).append('svg').attr('width', W).attr('height', H);
+  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width','100%').attr('height','auto').style('overflow','visible');
   const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
 
   const y = d3.scaleBand().domain(DATA.pioneers.map(d => d.name)).range([0, h]).padding(0.4);
-  const x = d3.scaleLinear().domain([0, 60]).range([0, w]);
+  const maxWeeks = d3.max(DATA.pioneers, d => d.weeks) || 60;
+  const x = d3.scaleLinear().domain([0, Math.ceil(maxWeeks * 1.05)]).range([0, w]);
 
   // Lines
   g.selectAll('.lollipop-line').data(DATA.pioneers).enter().append('line')
@@ -439,7 +439,7 @@ function drawExplosion() {
   const h = H - margin.top - margin.bottom;
 
   const svg = d3.select(el).append('svg').attr('width', W).attr('height', H).style('overflow','visible');
-  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+    const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`).style('overflow','visible');
 
   const x = d3.scaleLinear().domain([1931, 2024]).range([0, w]);
   const y = d3.scaleLinear().domain([0, 100]).range([h, 0]);
@@ -537,8 +537,8 @@ function drawQueens() {
 
   const sorted = [...DATA.queens].sort((a,b) => b.weeks - a.weeks);
 
-  const svg = d3.select(el).append('svg').attr('width', W).attr('height', H);
-  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width','100%').attr('height','auto').style('overflow','visible');
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`).style('overflow','visible');
 
   const y = d3.scaleBand().domain(sorted.map(d => d.name)).range([0, h]).padding(0.28);
   const x = d3.scaleLinear().domain([0, 420]).range([0, w]);
@@ -635,8 +635,8 @@ function renderGenresChart(filter) {
   const w = W - margin.left - margin.right;
   const h = H - margin.top - margin.bottom;
 
-  const svg = d3.select(el).append('svg').attr('width', W).attr('height', H).style('overflow','visible').attr('id','genres-svg');
-  const g = svg.append('g').attr('transform',`translate(${margin.left},${margin.top})`).attr('id','genres-g');
+  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width','100%').attr('height','auto').style('overflow','visible').attr('id','genres-svg');
+  const g = svg.append('g').attr('transform',`translate(${margin.left},${margin.top})`).attr('id','genres-g').style('overflow','visible');
 
   const x0 = d3.scaleBand().domain(decades).range([0,w]).padding(0.25);
   const x1 = d3.scaleBand().domain(series.map(s=>s.label)).range([0, x0.bandwidth()]).padding(0.08);
@@ -690,7 +690,7 @@ function drawExplosion() {
   const h = H - margin.top - margin.bottom;
   explosionChartW = w;
 
-  const svg = d3.select(el).append('svg').attr('width', W).attr('height', H).style('overflow','visible').attr('id','explosion-svg');
+  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width','100%').attr('height','auto').style('overflow','visible').attr('id','explosion-svg');
   const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
 
   const x = d3.scaleLinear().domain([1931, 2024]).range([0, w]);
@@ -731,14 +731,27 @@ function drawExplosion() {
     .attr('stroke','rgba(255,255,255,0.85)').attr('stroke-width',2.5).attr('d', lineF);
   const totalLen = path.node().getTotalLength();
   path.attr('stroke-dasharray', totalLen).attr('stroke-dashoffset', totalLen)
-    .transition().duration(2000).delay(200).attr('stroke-dashoffset', 0);
+    .transition().duration(3500).delay(200).attr('stroke-dashoffset', 0);
 
   // Highlight band (gold vertical band for active period)
   g.append('rect').attr('id','explosion-highlight-band')
     .attr('x', 0).attr('y', 0).attr('width', 0).attr('height', h)
     .attr('fill', 'rgba(201,168,76,0.12)').attr('stroke', C.gold).attr('stroke-width', 1.5)
     .attr('stroke-dasharray','4,3').attr('pointer-events','none').attr('rx', 2)
-    .style('transition','all 0.5s ease');
+    .style('transition','all 0.6s ease');
+
+  // Mousemove interaction: move highlight band to period based on mouse X
+  g.on('mousemove', (event) => {
+    const [mx] = d3.pointer(event, g.node());
+    const year = Math.round(x.invert(mx));
+    const steps = document.querySelectorAll('#section-6 .scroll-step');
+    for (let s of steps) {
+      const ys = parseInt(s.dataset.yearStart);
+      const ye = parseInt(s.dataset.yearEnd);
+      if (ys && ye && year >= ys && year <= ye) { highlightExplosionPeriod(ys, ye); return; }
+    }
+  });
+  g.on('mouseleave', () => { clearExplosionHighlight(); });
 
   // Cross annotation
   g.append('line').attr('x1', x(1978)).attr('x2', x(1978)).attr('y1', 0).attr('y2', h)
@@ -774,15 +787,15 @@ function highlightExplosionPeriod(yearStart, yearEnd) {
   const x2 = explosionXScale(yearEnd);
 
   // Dim left of range
-  d3.select('#explosion-dim-left').transition().duration(500)
+  d3.select('#explosion-dim-left').transition().duration(900)
     .attr('width', Math.max(0, x1));
 
   // Dim right of range
-  d3.select('#explosion-dim-right').transition().duration(500)
+  d3.select('#explosion-dim-right').transition().duration(900)
     .attr('x', x2).attr('width', Math.max(0, explosionChartW - x2));
 
   // Gold highlight band
-  d3.select('#explosion-highlight-band').transition().duration(500)
+  d3.select('#explosion-highlight-band').transition().duration(900)
     .attr('x', x1).attr('width', x2 - x1);
 }
 
@@ -818,65 +831,7 @@ function setupExplosionScrollSteps() {
   steps.forEach(s => stepObserver.observe(s));
 }
 
-// ---- SECTION 9: Donut today ----
-// reuses drawDonut with different center label
-function drawToday() {
-  const el = document.getElementById('chart-today');
-  if (!el || el.dataset.drawn) return;
-  el.dataset.drawn = '1';
-
-  const size = Math.min(el.clientWidth || 320, 320);
-  const radius = size / 2 - 20;
-
-  const svg = d3.select(el).append('svg')
-    .attr('viewBox', `0 0 ${size} ${size}`).attr('preserveAspectRatio','xMidYMid meet')
-    .style('display','block').style('margin','0 auto').style('width','100%').style('height','auto');
-  const g = svg.append('g').attr('transform', `translate(${size/2},${size/2})`);
-
-  const pie = d3.pie().value(d=>d.value).sort(null);
-  const arc = d3.arc().innerRadius(radius*0.55).outerRadius(radius);
-  const arcH = d3.arc().innerRadius(radius*0.55).outerRadius(radius+8);
-
-  const arcs = g.selectAll('path').data(pie(DATA.today)).enter().append('path')
-    .attr('fill', d => d.data.color)
-    .attr('stroke','rgba(255,255,255,0.5)').attr('stroke-width',2)
-    .attr('d', arc)
-    .on('mousemove', (e,d) => showTooltip(e, `<strong>${d.data.label}</strong><br/>${d.data.value}%`))
-    .on('mouseleave', (e,d) => { d3.select(e.currentTarget).attr('d',arc); hideTooltip(); })
-    .on('mouseenter', (e) => d3.select(e.currentTarget).transition().duration(200).attr('d',arcH));
-
-  arcs.attr('d', d => { const s={...d,endAngle:d.startAngle}; return arc(s); })
-    .transition().duration(900).delay((d,i)=>i*200)
-    .attrTween('d', function(d) {
-      const interp = d3.interpolate(d.startAngle+0.001, d.endAngle);
-      return t => { const dd={...d,endAngle:interp(t)}; return arc(dd); };
-    });
-
-  g.append('text').attr('text-anchor','middle').attr('dy','-0.2em')
-    .style('font-family','Playfair Display,serif').style('font-size','2rem').style('font-weight','900')
-    .style('fill','#8b4a7a').text('50.1%');
-  g.append('text').attr('text-anchor','middle').attr('dy','1.4em')
-    .style('font-family','Lora,serif').style('font-size','0.7rem').style('font-style','italic')
-    .style('fill',C.sepia).text('female, 2016–20');
-
-  // Legend as HTML below SVG to avoid clipping
-  const legendWrap = document.createElement('div');
-  legendWrap.className = 'donut-legend';
-  DATA.today.forEach(d => {
-    const item = document.createElement('div');
-    item.className = 'donut-legend-item';
-    const sw = document.createElement('span'); sw.className = 'donut-swatch'; sw.style.background = d.color;
-    const lbl = document.createElement('span'); lbl.className = 'donut-label'; lbl.textContent = d.label;
-    item.appendChild(sw); item.appendChild(lbl); legendWrap.appendChild(item);
-  });
-  el.appendChild(legendWrap);
-
-  const legend = svg.append('g').attr('transform',`translate(${size/2 - 95}, ${size-28})`);
-  DATA.today.forEach((d,i) => {
-    const lg = legend.append('g').attr('transform',`translate(${i*100},0)`);
-    lg.append('rect').attr('width',10).attr('height',10).attr('rx',2).attr('fill',d.color);
-    lg.append('text').attr('x',14).attr('y',9).style('font-family','Lora,serif').style('font-size','9px').style('fill',C.sepia).text(d.label.split(' ')[0]);
-  });
+// (duplicate drawExplosion removed — canonical version defined later)
 }
 
 // ---- SECTION 10: Prestige grouped bar ----
@@ -908,7 +863,7 @@ function drawPrestige() {
     }
   ];
 
-  const svg = d3.select(el).append('svg').attr('width',W).attr('height',H).style('overflow','visible');
+  const svg = d3.select(el).append('svg').attr('viewBox', `0 0 ${W} ${H}`).attr('width','100%').attr('height','auto').style('overflow','visible');
   const g = svg.append('g').attr('transform',`translate(${margin.left},${margin.top})`);
 
   const x0 = d3.scaleBand().domain(groups.map(d=>d.label)).range([0,w]).padding(0.35);

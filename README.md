@@ -28,7 +28,8 @@ No build process or local server is strictly required. To run the project:
 
 1. Clone this repository:
 ```bash
-   git clone (https://github.com/yourusername/bestsellers-scrollytelling.git)
+   git clone (https://github.com/anastasiaanaya/Book_Best-sellers_Scrollytelling.git)
+```
    
 2. Open index.html in any modern web browser.
 

@@ -18,8 +18,8 @@
   --rust-light:   #c4624a;
   --gold:         #c9a84c;
   --gold-light:   #e8c97a;
-  --male:         #c8b3e6; /* lila clar reemplaça blau */
-  --male-light:   #e6ddf8; /* tocat més clar per accents */
+  --male:         #c8b3e6; /* lila clar */
+  --male-light:   #e9e0f8; /* tocat més clar */
   --female:       #8b4a7a;
   --female-light: #b87aaa;
 
@@ -52,12 +52,6 @@ html, body {
   z-index: 1000;
   transition: width 0.15s linear;
 }
-
-/* Donut legend (HTML) */
-.donut-legend { display:flex; gap:12px; justify-content:center; align-items:center; margin-top:0.6rem; flex-wrap:wrap; }
-.donut-legend-item { display:flex; gap:8px; align-items:center; font-family: Lora, serif; color: var(--sepia); font-size: 0.9rem; }
-.donut-swatch { width:12px; height:12px; border-radius:2px; display:inline-block; flex: 0 0 12px; }
-.donut-label { display:inline-block; white-space:nowrap; }
 
 /* ---- NAV DOTS ---- */
 .chapter-nav {
@@ -172,7 +166,7 @@ html, body {
   width: 100%; max-width: 1100px;
   padding: 0 clamp(2rem, 5vw, 5rem);
   display: flex; flex-direction: column; gap: 2rem;
-  align-items: flex-start;
+  align-items: center; /* center contents horizontally */
 }
 
 .two-col {
