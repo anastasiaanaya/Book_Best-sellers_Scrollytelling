@@ -30,7 +30,7 @@
   --font-body:    'Lora', Georgia, serif;
   --font-accent:  'IM Fell English', Georgia, serif;
 
-  --section-pad: clamp(2.5rem, 5vw, 5rem);
+  --section-pad: clamp(4rem, 8vw, 8rem);
   --content-max: 1100px;
 }
 
@@ -135,8 +135,7 @@ body {
   min-height: 100vh;
   padding: var(--section-pad) clamp(1.5rem, 5vw, 4rem);
   display: flex;
-  align-items: flex-start;        /* top-align so tall content scrolls */
-  justify-content: center;
+  align-items: center;
   overflow: hidden;
   background: var(--cream);
 }
@@ -150,25 +149,25 @@ body {
 
 .chapter-alt  { background: var(--warm-white); }
 .chapter-dark {
-  background: #2e1f0e;        /* deep warm brown, NOT pure black */
-  color: #f0ead8;
+  background: var(--ink);
+  color: var(--cream);
 }
-.chapter-dark .chapter-label { color: #e8c97a; }
-.chapter-dark .body-text { color: #e0d5c4; font-size: 1.05rem; }
-.chapter-dark .chart-caption { color: #c0b49e; }
+.chapter-dark .chapter-label { color: var(--gold-light); }
+.chapter-dark .body-text { color: #c8bfb0; }
+.chapter-dark .chart-caption { color: #9e8f7c; }
 .chapter-dark .stat-card {
-  background: rgba(255,255,255,0.10);
-  border-color: rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.1);
 }
-.chapter-dark .stat-desc { color: #d4c9b6; }
+.chapter-dark .stat-desc { color: #a09282; }
 
 .chapter-finale {
-  background: #1e2e40;        /* deep navy, legible on projector */
-  color: #eef4fb;
+  background: var(--ink-light);
+  color: var(--cream);
 }
-.chapter-finale .chapter-label { color: #e8c97a; }
-.chapter-finale .body-text { color: #c8dff0; font-size: 1.05rem; }
-.chapter-finale .chart-caption { color: #9ab8d0; }
+.chapter-finale .chapter-label { color: var(--gold); }
+.chapter-finale .body-text { color: #c8bfb0; }
+.chapter-finale .chart-caption { color: #9e8f7c; }
 
 /* Background chapter numbers */
 .chapter-number-bg {
@@ -184,8 +183,8 @@ body {
   user-select: none;
   z-index: 0;
 }
-.chapter-dark .chapter-number-bg { color: rgba(255,255,255,0.06); }
-.chapter-finale .chapter-number-bg { color: rgba(255,255,255,0.06); }
+.chapter-dark .chapter-number-bg,
+.chapter-finale .chapter-number-bg { color: rgba(255,255,255,0.04); }
 
 /* ---- LAYOUT ---- */
 .chapter-inner {
@@ -194,15 +193,13 @@ body {
   width: 100%;
   max-width: var(--content-max);
   margin: 0 auto;
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
 }
 
 .two-col {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: clamp(2rem, 5vw, 5rem);
-  align-items: center;
+  align-items: start;    /* top-align so donut + legend don't fight */
 }
 
 .centered { text-align: center; }
@@ -322,22 +319,22 @@ body {
 /* ---- TYPOGRAPHY ---- */
 h2 {
   font-family: var(--font-display);
-  font-size: clamp(1.7rem, 3.5vw, 3rem);
+  font-size: clamp(2rem, 4vw, 3.5rem);
   font-weight: 700;
   line-height: 1.1;
   color: var(--ink);
   margin-bottom: 1.5rem;
 }
 
-.chapter-dark h2 { color: #f5ede0; }
-.chapter-finale h2 { color: #dceeff; }
+.chapter-dark h2,
+.chapter-finale h2 { color: var(--cream); }
 
 h2 em { color: var(--rust); font-style: italic; }
 
 .body-text {
   font-family: var(--font-body);
-  font-size: 0.95rem;
-  line-height: 1.8;
+  font-size: 1rem;
+  line-height: 1.9;
   color: var(--ink-light);
   max-width: 52ch;
 }
@@ -356,16 +353,6 @@ h2 em { color: var(--rust); font-style: italic; }
   background: rgba(201,168,76,0.07);
   border-radius: 0 4px 4px 0;
 }
-.chapter-dark .pull-quote {
-  color: #e0d0b8;
-  background: rgba(201,168,76,0.12);
-  border-left-color: #e8c97a;
-}
-.chapter-finale .pull-quote {
-  color: #b8d0e8;
-  background: rgba(100,160,220,0.10);
-  border-left-color: #7ab0d8;
-}
 
 /* ---- CHARTS ---- */
 .text-block { }
@@ -377,23 +364,18 @@ h2 em { color: var(--rust); font-style: italic; }
 
 .chart-container {
   width: 100%;
-  height: 300px; min-height: 260px;
+  min-height: 280px;
   background: rgba(255,255,255,0.5);
   border: 1px solid rgba(120,90,60,0.15);
   border-radius: 6px;
   padding: 1rem;
   backdrop-filter: blur(4px);
-}
-.chapter-dark .chart-container {
-  background: rgba(255,255,255,0.10);
-  border-color: rgba(255,255,255,0.20);
-}
-.chapter-finale .chart-container {
-  background: rgba(255,255,255,0.08);
-  border-color: rgba(255,255,255,0.18);
+  /* height:auto so SVG + legend never get clipped */
+  height: auto;
+  overflow: visible;
 }
 
-.chart-wide { height: 360px; min-height: 300px; }
+.chart-wide { min-height: 340px; }
 
 .chart-caption {
   margin-top: 0.75rem;
@@ -428,7 +410,7 @@ h2 em { color: var(--rust); font-style: italic; }
 
 .stat-number {
   font-family: var(--font-display);
-  font-size: 2.2rem;
+  font-size: 2.8rem;
   font-weight: 900;
   color: var(--gold);
   line-height: 1;
@@ -490,7 +472,7 @@ h2 em { color: var(--rust); font-style: italic; }
 .finale-number {
   display: block;
   font-family: var(--font-display);
-  font-size: clamp(3rem, 7vw, 6rem);
+  font-size: clamp(4rem, 10vw, 8rem);
   font-weight: 900;
   color: var(--gold);
   line-height: 1;
@@ -507,7 +489,7 @@ h2 em { color: var(--rust); font-style: italic; }
   font-family: var(--font-body);
   font-style: italic;
   font-size: 1rem;
-  color: #b8d0e8;
+  color: #a09282;
   max-width: 40ch;
   margin-left: auto;
   margin-right: auto;
@@ -518,19 +500,19 @@ h2 em { color: var(--rust); font-style: italic; }
   text-align: center;
   margin-top: 3rem;
   padding-top: 2rem;
-  border-top: 1px solid rgba(255,255,255,0.18);
+  border-top: 1px solid rgba(255,255,255,0.1);
 }
 
 .closing-text {
   font-size: 0.75rem;
-  color: #8aabca;
+  color: #6e5f50;
   letter-spacing: 0.08em;
 }
 
 .closing-note {
   margin-top: 0.5rem;
   font-size: 0.72rem;
-  color: #7090a8;
+  color: #5a4c3d;
   font-style: italic;
 }
 
@@ -571,12 +553,12 @@ h2 em { color: var(--rust); font-style: italic; }
 }
 
 .chapter-dark .d3-axis path,
-.chapter-dark .d3-axis line { stroke: rgba(255,255,255,0.25); }
+.chapter-dark .d3-axis line,
 .chapter-finale .d3-axis path,
-.chapter-finale .d3-axis line { stroke: rgba(255,255,255,0.25); }
+.chapter-finale .d3-axis line { stroke: rgba(255,255,255,0.15); }
 
-.chapter-dark .d3-axis text { fill: #d8cfc3; }
-.chapter-finale .d3-axis text { fill: #9ab8d0; }
+.chapter-dark .d3-axis text,
+.chapter-finale .d3-axis text { fill: #9e8f7c; }
 
 .d3-tooltip {
   position: fixed;
@@ -596,23 +578,23 @@ h2 em { color: var(--rust); font-style: italic; }
 /* ---- EXPLOSION SCROLL LAYOUT ---- */
 .explosion-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4rem;
+  /* Left col: big chart; right col: compact narrative steps */
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 3rem;
   align-items: start;
-  min-height: 100vh;
+  /* The section itself provides the min-height via .chapter */
 }
 
 /*
-  Explosion layout notes:
-  - This two-column layout pairs a sticky chart panel with vertically long
-    narrative scroll steps on the right. The chart remains visible while the
-    user scrolls through the explanatory steps, which trigger highlighting
-    ranges on the chart via JS.
+  New Explosion layout:
+  - Chart is large and sticky, always visible in the left column.
+  - Steps on the right are compact (no 60vh each) — all 4 fit in the viewport.
+  - Users never need to scroll back up to see which period is highlighted.
 */
 
 .sticky-chart-panel {
   position: sticky;
-  top: calc(50vh - 220px);
+  top: calc(50vh - 200px);
   align-self: start;
 }
 
@@ -620,33 +602,37 @@ h2 em { color: var(--rust); font-style: italic; }
   display: flex;
   flex-direction: column;
   gap: 0;
-  padding: 20vh 0 40vh;
+  /* Small top padding so first step aligns with chart mid-point */
+  padding: 8vh 0 4vh;
 }
 
 .scroll-step {
-  min-height: 55vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 2rem 0;
+  /* Compact: all 4 steps should fit without scrolling */
+  min-height: unset;
+  padding: 1.1rem 0 1.1rem 1.4rem;
   border-left: 2px solid transparent;
-  padding-left: 1.5rem;
-  transition: border-color 0.4s ease;
+  transition: border-color 0.4s ease, background 0.4s ease;
+  border-radius: 0 6px 6px 0;
+}
+
+.scroll-step + .scroll-step {
+  margin-top: 0.6rem;
 }
 
 .scroll-step.active-step {
   border-left-color: var(--gold);
+  background: rgba(201,168,76,0.06);
 }
 
 .scroll-step .step-label {
   display: block;
   font-family: var(--font-body);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-style: italic;
   letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--sepia);
-  margin-bottom: 1rem;
+  margin-bottom: 0.6rem;
 }
 
 /* Area chart highlight overlay */
@@ -791,3 +777,39 @@ h2 em { color: var(--rust); font-style: italic; }
   .chapter-nav { display: none; }
   .chapter-number-bg { font-size: 6rem; }
 }
+/* ---- DARK/FINALE section chart containers ---- */
+.chapter-dark .chart-container {
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(255,255,255,0.20);
+}
+.chapter-finale .chart-container {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.18);
+}
+
+/* Dark section text fixes for projector legibility */
+.chapter-dark { background: #2e1f0e; color: #f0ead8; }
+.chapter-dark .chapter-label { color: #e8c97a; }
+.chapter-dark .body-text { color: #e0d5c4; }
+.chapter-dark .chart-caption { color: #c0b49e; }
+.chapter-dark .stat-card { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.22); }
+.chapter-dark .stat-desc { color: #d4c9b6; }
+.chapter-dark h2 { color: #f5ede0; }
+.chapter-dark .d3-axis path, .chapter-dark .d3-axis line { stroke: rgba(255,255,255,0.25); }
+.chapter-dark .d3-axis text { fill: #d8cfc3; }
+.chapter-dark .pull-quote { color: #e0d0b8; background: rgba(201,168,76,0.12); border-left-color: #e8c97a; }
+.chapter-dark .chapter-number-bg { color: rgba(255,255,255,0.06); }
+
+.chapter-finale { background: #1e2e40; color: #eef4fb; }
+.chapter-finale .chapter-label { color: #e8c97a; }
+.chapter-finale .body-text { color: #c8dff0; }
+.chapter-finale .chart-caption { color: #9ab8d0; }
+.chapter-finale h2 { color: #dceeff; }
+.chapter-finale .d3-axis path, .chapter-finale .d3-axis line { stroke: rgba(255,255,255,0.25); }
+.chapter-finale .d3-axis text { fill: #9ab8d0; }
+.chapter-finale .finale-label { color: #b8d0e8; }
+.chapter-finale .closing-text { color: #8aabca; }
+.chapter-finale .closing-note { color: #7090a8; }
+.chapter-finale .closing { border-top-color: rgba(255,255,255,0.18); }
+.chapter-finale .chapter-number-bg { color: rgba(255,255,255,0.06); }
+.chapter-finale .finale-number { color: var(--gold); }
