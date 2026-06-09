@@ -272,7 +272,7 @@ function drawScale() {
   const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
 
   const x = d3.scaleBand().domain(DATA.scale.map(d => d.decade)).range([0, w]).padding(0.3);
-  const y = d3.scaleLinear().domain([0, 4000]).nice().range([h, 0]);
+  const y = d3.scaleLinear().domain([0, 8000]).nice().range([h, 0]);
 
   // Grid lines
   g.selectAll('.grid-line').data(y.ticks(5)).enter().append('line')
@@ -455,7 +455,7 @@ function drawPioneers() {
     .attr('y', d => y(d.name) + y.bandwidth()/2 + 4)
     .attr('x', d => x(d.weeks) + 12)
     .style('font-family', 'Lora, serif').style('font-size', '10px').style('fill', C.female)
-    .text(d => d.weeks);
+    .text(d => `${d.weeks} weeks`);
 
   g.append('g').attr('class', 'd3-axis').call(d3.axisLeft(y).tickSize(0)).select('.domain').remove();
 }
@@ -574,7 +574,8 @@ function drawQueens() {
   const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
 
   const y = d3.scaleBand().domain(sorted.map(d => d.name)).range([0, h]).padding(0.28);
-  const x = d3.scaleLinear().domain([0, 420]).range([0, w]);
+  const maxWeeks = d3.max(sorted, d => d.weeks);
+  const x = d3.scaleLinear().domain([0, maxWeeks * 1.15]).range([0, w]);
 
   // Bars
   const bars = g.selectAll('.queen-bar').data(sorted).enter().append('rect')
@@ -671,9 +672,10 @@ function renderGenresChart(filter) {
   const svg = d3.select(el).append('svg').attr('width', W).attr('height', H).style('overflow','visible').attr('id','genres-svg');
   const g = svg.append('g').attr('transform',`translate(${margin.left},${margin.top})`).attr('id','genres-g');
 
+
   const x0 = d3.scaleBand().domain(decades).range([0,w]).padding(0.25);
-  const x1 = d3.scaleBand().domain(series.map(s=>s.label)).range([0, x0.bandwidth()]).padding(0.08);
-  const y  = d3.scaleLinear().domain([0, 55]).range([h, 0]);
+  const x1 = d3.scaleBand().domain(series.map(s=>s.label)).range([0, x0.bandwidth()]).padding(0.3);
+  const y  = d3.scaleLinear().domain([0, 100]).range([h, 0]);
 
   const decadeG = g.selectAll('.decade-g').data(decades).enter().append('g')
     .attr('class','decade-g').attr('transform', d => `translate(${x0(d)},0)`);

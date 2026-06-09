@@ -14,7 +14,7 @@
   --ink-light:   #3d2b1f;
   --sepia:       #7a5c3a;
   --sepia-light: #b08060;
-  --rust:        #8b3a2a;
+  --rust:        #de4222;
   --rust-light:  #c4624a;
   --slate:       #2c3e50;
   --gold:        #c9a84c;
@@ -788,7 +788,7 @@ h2 em { color: var(--rust); font-style: italic; }
 }
 
 /* Dark section text fixes for projector legibility */
-.chapter-dark { background: #2e1f0e; color: #f0ead8; }
+/* .chapter-dark { background: #2e1f0e; color: #f0ead8; }
 .chapter-dark .chapter-label { color: #e8c97a; }
 .chapter-dark .body-text { color: #e0d5c4; }
 .chapter-dark .chart-caption { color: #c0b49e; }
@@ -812,4 +812,80 @@ h2 em { color: var(--rust); font-style: italic; }
 .chapter-finale .closing-note { color: #7090a8; }
 .chapter-finale .closing { border-top-color: rgba(255,255,255,0.18); }
 .chapter-finale .chapter-number-bg { color: rgba(255,255,255,0.06); }
-.chapter-finale .finale-number { color: var(--gold); }
+.chapter-finale .finale-number { color: var(--gold); } */
+
+/* ==================================================================
+   CORRECCIONS DE CONTRAST I LLEGIBILITAT (DIAPOSITIVES 4 I 9)
+   Substitueix les línies del final del teu fitxer per aquestes:
+   ================================================================== */
+
+/* ---- DIAPOSITIVA 4 (Secció fosca .chapter-dark) ---- */
+.chapter-dark { background: #2e1f0e; color: #f0ead8; }
+.chapter-dark .chapter-label { color: #e8c97a; }
+.chapter-dark .body-text { color: #ffffff; } /* Passem a blanc pur el text principal */
+
+/* Text aclaridor petit sota la gràfica: d'un gris apagat a blanc pur */
+.chapter-dark .chart-caption { color: #ffffff; font-weight: 500; } 
+
+.chapter-dark .stat-card { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.22); }
+.chapter-dark .stat-desc { color: #ffffff; font-weight: 500; } /* Textos petits de targetes a blanc */
+.chapter-dark h2 { color: #ffffff; }
+.chapter-dark .d3-axis path, .chapter-dark .d3-axis line { stroke: rgba(255,255,255,0.4); } /* Eixos de la gràfica més visibles */
+
+/* TEXT DE LA GRÀFICA (Eixos D3): Forcem el blanc pur, pugem a 12px i donem més cos (500) perquè no s'embondi */
+.chapter-dark .d3-axis text { fill: #ffffff !important; font-size: 12px; font-weight: 500; } 
+
+.chapter-dark .pull-quote { color: #ffffff; background: rgba(201,168,76,0.15); border-left-color: #e8c97a; }
+.chapter-dark .chapter-number-bg { color: rgba(255,255,255,0.06); }
+.chapter-dark .scroll-cue { color: #ffffff; }
+
+/* Correcció extra: per si fas servir llistes o passos narratius en aquesta diapo */
+.chapter-dark .step-label { color: #e8c97a; }
+.chapter-dark .filter-label { color: #ffffff; }
+.chapter-dark .filter-btn { color: #ffffff; border-color: #ffffff; }
+
+
+/* ---- DIAPOSITIVA 10 (Secció final .chapter-finale) ---- */
+.chapter-finale { background: #1e2e40; color: #eef4fb; }
+.chapter-finale .chapter-label { color: #e8c97a; }
+.chapter-finale .body-text { color: #ffffff; } /* Text principal a blanc radiant */
+
+/* TOTS ELS TEXTOS PETITS DE LA DIAPO 10: canviats a blanc o blaus cel molt brillants */
+.chapter-finale .chart-caption { color: #ffffff; font-weight: 500; }
+.chapter-finale .d3-axis text { fill: #ffffff !important; font-size: 12px; font-weight: 500; }
+.chapter-finale .finale-label { color: #ffffff; font-size: 1.05rem; }  /* Text descriptiu de sota el número */
+.chapter-finale .closing-text { color: #ffffff; font-weight: 600; }    /* Text de crèdits/tancament */
+.chapter-finale .closing-note { color: #c8dff0; font-style: italic; }  /* Nota petita final */
+.chapter-finale .stat-desc { color: #ffffff; font-weight: 500; }
+.chapter-finale .scroll-cue { color: #ffffff; }
+.chapter-finale .step-label { color: #e8c97a; }
+
+/* Detalls visuals adaptats al fons blau */
+.chapter-finale h2 { color: #ffffff; }
+.chapter-finale .d3-axis path, .chapter-finale .d3-axis line { stroke: rgba(255,255,255,0.4); }
+.chapter-finale .closing { border-top-color: rgba(255,255,255,0.3); }
+.chapter-finale .chapter-number-bg { color: rgba(255,255,255,0.06); }
+.chapter-finale .finale-number { color: #e8c97a; }
+
+/* ==========================================================================
+   FIX DE VISIBILITAT PER ALS GRÀFICS EN SECCIONS FOSQUES (DIAPOS 9 I 10)
+   ========================================================================== */
+
+/* Diapositiva 9 (.chapter-dark) — Força que tot el text del gràfic sigui clar */
+.chapter-dark .chart-container text,
+.chapter-dark .chart-container tspan {
+  fill: #f0ead8 !important;
+}
+/* Per si el gràfic genera elements de text HTML de tipus div o span */
+.chapter-dark .chart-container {
+  color: #f0ead8 !important;
+}
+
+/* Diapositiva 10 (Epíleg / .chapter-finale) — Assegura també la llegibilitat de la diapo final */
+.chapter-finale .chart-container text,
+.chapter-finale .chart-container tspan {
+  fill: #eef4fb !important;
+}
+.chapter-finale .chart-container {
+  color: #eef4fb !important;
+}
