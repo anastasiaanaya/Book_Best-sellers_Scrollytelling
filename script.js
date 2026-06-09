@@ -260,8 +260,8 @@ function drawScale() {
   if (!el || el.dataset.drawn) return;
   el.dataset.drawn = '1';
 
-  const W = el.clientWidth || 600, H = 280;
-  const margin = { top: 20, right: 20, bottom: 40, left: 55 };
+  const W = el.clientWidth || 560, H = 240;
+  const margin = { top: 24, right: 24, bottom: 36, left: 50 };
   const w = W - margin.left - margin.right;
   const h = H - margin.top - margin.bottom;
 
@@ -271,8 +271,8 @@ function drawScale() {
 
   const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
 
-  const x = d3.scaleBand().domain(DATA.scale.map(d => d.decade)).range([0, w]).padding(0.3);
-  const y = d3.scaleLinear().domain([0, 4000]).nice().range([h, 0]);
+  const x = d3.scaleBand().domain(DATA.scale.map(d => d.decade)).range([0, w]).padding(0.28);
+  const y = d3.scaleLinear().domain([0, 9000]).nice().range([h, 0]);
 
   // Grid lines
   g.selectAll('.grid-line').data(y.ticks(5)).enter().append('line')
@@ -312,8 +312,8 @@ function drawDonut(containerId, data, title) {
   if (!el || el.dataset.drawn) return;
   el.dataset.drawn = '1';
 
-  const size = Math.min(el.clientWidth || 320, 320);
-  const radius = size / 2 - 20;
+  const size = Math.min(el.clientWidth || 300, 300);
+  const radius = size / 2 - 24;
 
   const svg = d3.select(el).append('svg')
     .attr('width', size).attr('height', size)
@@ -403,16 +403,17 @@ function drawPioneers() {
   if (!el || el.dataset.drawn) return;
   el.dataset.drawn = '1';
 
-  const W = el.clientWidth || 380, H = 260;
-  const margin = { top: 10, right: 30, bottom: 30, left: 150 };
+  const W = el.clientWidth || 440, H = 240;
+  const margin = { top: 10, right: 60, bottom: 20, left: 155 };
   const w = W - margin.left - margin.right;
   const h = H - margin.top - margin.bottom;
 
   const svg = d3.select(el).append('svg').attr('width', W).attr('height', H);
   const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
 
+  const maxWeeks = d3.max(DATA.pioneers, d => d.weeks);
   const y = d3.scaleBand().domain(DATA.pioneers.map(d => d.name)).range([0, h]).padding(0.4);
-  const x = d3.scaleLinear().domain([0, 60]).range([0, w]);
+  const x = d3.scaleLinear().domain([0, maxWeeks * 1.15]).range([0, w]);
 
   // Lines
   g.selectAll('.lollipop-line').data(DATA.pioneers).enter().append('line')
@@ -436,9 +437,9 @@ function drawPioneers() {
   // Labels
   g.selectAll('.week-label').data(DATA.pioneers).enter().append('text')
     .attr('y', d => y(d.name) + y.bandwidth()/2 + 4)
-    .attr('x', d => x(d.weeks) + 12)
+    .attr('x', d => x(d.weeks) + 10)
     .style('font-family', 'Lora, serif').style('font-size', '10px').style('fill', C.female)
-    .text(d => d.weeks + ' wks');
+    .text(d => d.weeks + ' appearances');
 
   g.append('g').attr('class', 'd3-axis').call(d3.axisLeft(y).tickSize(0)).select('.domain').remove();
 }
@@ -546,8 +547,8 @@ function drawQueens() {
   if (!el || el.dataset.drawn) return;
   el.dataset.drawn = '1';
 
-  const W = el.clientWidth || 660, H = 320;
-  const margin = { top: 10, right: 70, bottom: 20, left: 175 };
+  const W = el.clientWidth || 680, H = 300;
+  const margin = { top: 10, right: 72, bottom: 20, left: 178 };
   const w = W - margin.left - margin.right;
   const h = H - margin.top - margin.bottom;
 
@@ -556,8 +557,9 @@ function drawQueens() {
   const svg = d3.select(el).append('svg').attr('width', W).attr('height', H);
   const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
 
+  const maxQ = d3.max(sorted, d => d.weeks);
   const y = d3.scaleBand().domain(sorted.map(d => d.name)).range([0, h]).padding(0.28);
-  const x = d3.scaleLinear().domain([0, 420]).range([0, w]);
+  const x = d3.scaleLinear().domain([0, maxQ * 1.08]).range([0, w]);
 
   // Bars
   const bars = g.selectAll('.queen-bar').data(sorted).enter().append('rect')
@@ -583,7 +585,7 @@ function drawQueens() {
     .attr('y', d => y(d.name) + y.bandwidth()/2 + 4)
     .attr('x', d => x(d.weeks) + 8)
     .style('font-family','Lora,serif').style('font-size','11px').style('fill', C.sepia)
-    .text(d => d.weeks + ' wks')
+    .text(d => d.weeks.toLocaleString())
     .style('opacity', 0)
     .transition().delay((d,i) => i*80 + 400).duration(300)
     .style('opacity', 1);
@@ -646,17 +648,20 @@ function drawGenres() {
 function renderGenresChart(filter) {
   const el = document.getElementById('chart-genres');
   const { decades, series } = getGenresData(filter);
-  const W = el.clientWidth || 700, H = 340;
-  const margin = { top: 30, right: 30, bottom: 55, left: 45 };
+  const W = el.clientWidth || 700, H = 320;
+  const margin = { top: 24, right: 20, bottom: 60, left: 42 };
   const w = W - margin.left - margin.right;
   const h = H - margin.top - margin.bottom;
 
   const svg = d3.select(el).append('svg').attr('width', W).attr('height', H).style('overflow','visible').attr('id','genres-svg');
   const g = svg.append('g').attr('transform',`translate(${margin.left},${margin.top})`).attr('id','genres-g');
 
-  const x0 = d3.scaleBand().domain(decades).range([0,w]).padding(0.25);
-  const x1 = d3.scaleBand().domain(series.map(s=>s.label)).range([0, x0.bandwidth()]).padding(0.08);
-  const y  = d3.scaleLinear().domain([0, 55]).range([h, 0]);
+  const allVals = series.flatMap(s => s.values);
+  const yMax = Math.ceil(d3.max(allVals) / 10) * 10 + 5;
+
+  const x0 = d3.scaleBand().domain(decades).range([0,w]).padding(0.22);
+  const x1 = d3.scaleBand().domain(series.map(s=>s.label)).range([0, x0.bandwidth()]).padding(0.06);
+  const y  = d3.scaleLinear().domain([0, yMax]).range([h, 0]);
 
   const decadeG = g.selectAll('.decade-g').data(decades).enter().append('g')
     .attr('class','decade-g').attr('transform', d => `translate(${x0(d)},0)`);
@@ -674,12 +679,13 @@ function renderGenresChart(filter) {
   g.append('g').attr('class','d3-axis').attr('transform',`translate(0,${h})`).call(d3.axisBottom(x0).tickSize(0)).select('.domain').remove();
   g.append('g').attr('class','d3-axis').call(d3.axisLeft(y).ticks(5).tickFormat(d=>d+'%')).select('.domain').remove();
 
-  // Legend
+  // Legend — two rows of 3+2
   const legend = g.append('g').attr('id','genres-legend').attr('transform', `translate(0, ${h+36})`);
   series.forEach((s,i) => {
-    const lg = legend.append('g').attr('transform', `translate(${i * 130}, 0)`);
-    lg.append('rect').attr('width',10).attr('height',10).attr('rx',2).attr('fill',s.color);
-    lg.append('text').attr('x',14).attr('y',9).style('font-family','Lora,serif').style('font-size','9px').style('fill',C.sepia).text(s.label);
+    const row = Math.floor(i / 3), col = i % 3;
+    const lg = legend.append('g').attr('transform', `translate(${col * 145}, ${row * 16})`);
+    lg.append('rect').attr('width',9).attr('height',9).attr('rx',2).attr('fill',s.color);
+    lg.append('text').attr('x',13).attr('y',8).style('font-family','Lora,serif').style('font-size','9px').style('fill',C.sepia).text(s.label);
   });
 }
 
@@ -700,8 +706,8 @@ function drawExplosion() {
   if (!el || el.dataset.drawn) return;
   el.dataset.drawn = '1';
 
-  const W = el.clientWidth || 700, H = 340;
-  const margin = { top: 20, right: 30, bottom: 40, left: explosionMarginL };
+  const W = el.clientWidth || 680, H = 310;
+  const margin = { top: 20, right: 30, bottom: 36, left: explosionMarginL };
   const w = W - margin.left - margin.right;
   const h = H - margin.top - margin.bottom;
   explosionChartW = w;
@@ -730,6 +736,15 @@ function drawExplosion() {
       grad.append('stop').attr('offset','100%').attr('stop-color',C.male).attr('stop-opacity',0.3);
     }
   });
+
+  // ── Invisible hover zones per period ──────────────────────────────────────
+  // Each zone covers a narrative period; hovering highlights it and marks the step.
+  const hoverZones = [
+    { ys: 1931, ye: 1945, stepIdx: 0 },
+    { ys: 1955, ye: 1969, stepIdx: 1 },
+    { ys: 1970, ye: 1984, stepIdx: 2 },
+    { ys: 1995, ye: 2020, stepIdx: 3 },
+  ];
 
   // Dim overlay (covers the whole chart, sits on top, controlled per step)
   g.append('rect').attr('id','explosion-dim-left')
@@ -776,6 +791,28 @@ function drawExplosion() {
     .call(d3.axisBottom(x).tickFormat(d3.format('d')).ticks(10)).select('.domain').remove();
   g.append('g').attr('class','d3-axis')
     .call(d3.axisLeft(y).ticks(5).tickFormat(d => d+'%')).select('.domain').remove();
+
+  // Draw hover zones on top of everything
+  hoverZones.forEach((zone, zi) => {
+    const zx = x(zone.ys), zw = x(zone.ye) - x(zone.ys);
+    g.append('rect')
+      .attr('x', zx).attr('y', 0).attr('width', zw).attr('height', h)
+      .attr('fill', 'transparent').attr('cursor', 'pointer')
+      .on('mouseenter', () => {
+        highlightExplosionPeriod(zone.ys, zone.ye);
+        const steps = document.querySelectorAll('#section-6 .scroll-step');
+        steps.forEach((s,si) => s.classList.toggle('active-step', si === zone.stepIdx));
+      })
+      .on('click', () => {
+        const steps = document.querySelectorAll('#section-6 .scroll-step');
+        if (steps[zone.stepIdx]) {
+          steps[zone.stepIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      })
+      .on('mouseleave', () => {
+        // keep highlight until next scroll-step fires
+      });
+  });
 
   // Set up scroll-step observer for explosion
   setupExplosionScrollSteps();
@@ -869,10 +906,10 @@ function drawToday() {
 
   g.append('text').attr('text-anchor','middle').attr('dy','-0.2em')
     .style('font-family','Playfair Display,serif').style('font-size','2rem').style('font-weight','900')
-    .style('fill','#8b4a7a').text('62%');
+    .style('fill','#8b4a7a').text('50.1%');
   g.append('text').attr('text-anchor','middle').attr('dy','1.4em')
     .style('font-family','Lora,serif').style('font-size','0.7rem').style('font-style','italic')
-    .style('fill',C.sepia).text('female, 2020–24');
+    .style('fill',C.sepia).text('female, 2016–20');
 
   const legend = svg.append('g').attr('transform',`translate(${size/2 - 95}, ${size-28})`);
   DATA.today.forEach((d,i) => {
@@ -882,54 +919,110 @@ function drawToday() {
   });
 }
 
-// ---- SECTION 10: Prestige grouped bar ----
+// ---- SECTION 10: Prestige — two grouped bars (real data) ----
 function drawPrestige() {
   const el = document.getElementById('chart-prestige');
   if (!el || el.dataset.drawn) return;
   el.dataset.drawn = '1';
 
-  const W = el.clientWidth || 600, H = 280;
-  const margin = { top: 20, right: 30, bottom: 60, left: 50 };
+  // Two question pairs:
+  // Left:  % of NYT bestselling titles whose author also won a Pulitzer
+  // Right: % of Pulitzer Fiction winners who appeared on the NYT list
+  const groups = [
+    {
+      label: '% of NYT titles by\nPulitzer-winning authors',
+      bars: [
+        { sub: 'Male',   pct: 15.4, color: C.male,   n: '4,444 unique titles' },
+        { sub: 'Female', pct: 16.3, color: C.female, n: '2,974 unique titles' },
+      ]
+    },
+    {
+      label: '% of Pulitzer Fiction\nwinners on the NYT list',
+      bars: [
+        { sub: 'Male',   pct: 87, color: C.male,   n: '30 Pulitzer winners' },
+        { sub: 'Female', pct: 91, color: C.female, n: '23 Pulitzer winners' },
+      ]
+    }
+  ];
+
+  const W = el.clientWidth || 580, H = 260;
+  const margin = { top: 28, right: 20, bottom: 70, left: 44 };
   const w = W - margin.left - margin.right;
   const h = H - margin.top - margin.bottom;
 
-  const data = [
-    { label: 'Male bestsellers\nwith major prize', pct: 10, color: C.male },
-    { label: 'Female bestsellers\nwith major prize', pct:  6, color: C.female },
-    { label: 'Male Pulitzer\non list', pct: 38, color: C.male, opacity: 0.5 },
-    { label: 'Female Pulitzer\non list', pct: 28, color: C.female, opacity: 0.5 },
-  ];
+  const svg = d3.select(el).append('svg').attr('width', W).attr('height', H).style('overflow','visible');
+  const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
 
-  const svg = d3.select(el).append('svg').attr('width',W).attr('height',H).style('overflow','visible');
-  const g = svg.append('g').attr('transform',`translate(${margin.left},${margin.top})`);
+  const x0 = d3.scaleBand().domain(groups.map(d => d.label)).range([0, w]).padding(0.4);
+  const x1 = d3.scaleBand().domain(['Male','Female']).range([0, x0.bandwidth()]).padding(0.12);
+  const y  = d3.scaleLinear().domain([0, 100]).range([h, 0]);
 
-  const x = d3.scaleBand().domain(data.map(d=>d.label)).range([0,w]).padding(0.3);
-  const y = d3.scaleLinear().domain([0,50]).nice().range([h,0]);
+  // Light grid
+  g.selectAll('.pg').data(y.ticks(4)).enter().append('line')
+    .attr('x1', 0).attr('x2', w).attr('y1', d => y(d)).attr('y2', d => y(d))
+    .attr('stroke', 'rgba(255,255,255,0.10)').attr('stroke-dasharray', '3,3');
 
-  g.selectAll('.p-bar').data(data).enter().append('rect')
-    .attr('x', d => x(d.label)).attr('width', x.bandwidth())
+  // Grouped bars
+  const grpG = g.selectAll('.pgroup').data(groups).enter().append('g')
+    .attr('transform', d => `translate(${x0(d.label)}, 0)`);
+
+  grpG.selectAll('rect').data(d => d.bars)
+    .enter().append('rect')
+    .attr('x', d => x1(d.sub)).attr('width', x1.bandwidth())
     .attr('y', h).attr('height', 0)
-    .attr('fill', d => d.color).attr('opacity', d => d.opacity || 1).attr('rx', 3)
-    .on('mousemove', (e,d) => showTooltip(e, `<strong>${d.label.replace('\n',' ')}</strong><br/>${d.pct}%`))
+    .attr('fill', d => d.color).attr('rx', 3)
+    .on('mousemove', (e, d) => showTooltip(e,
+      `<strong>${d.sub}</strong><br/>${d.pct}%<br/><span style="font-size:10px;opacity:0.75">${d.n}</span>`))
     .on('mouseleave', hideTooltip)
-    .transition().duration(700).delay((d,i)=>i*100)
+    .transition().duration(750).delay((d, i) => i * 140)
     .attr('y', d => y(d.pct)).attr('height', d => h - y(d.pct));
 
-  g.selectAll('.p-label').data(data).enter().append('text')
-    .attr('x', d => x(d.label) + x.bandwidth()/2)
+  // Value labels
+  grpG.selectAll('.pval').data(d => d.bars)
+    .enter().append('text')
+    .attr('x', d => x1(d.sub) + x1.bandwidth() / 2)
     .attr('y', d => y(d.pct) - 6)
-    .attr('text-anchor','middle')
-    .style('font-family','Playfair Display,serif').style('font-size','13px').style('font-weight','700')
-    .style('fill', '#e8c97a').text(d => d.pct + '%');
+    .attr('text-anchor', 'middle')
+    .style('font-family', 'Playfair Display,serif').style('font-size', '13px').style('font-weight', '700')
+    .style('fill', '#e8c97a')
+    .text(d => d.pct + '%')
+    .style('opacity', 0).transition().delay((d,i) => i*140+400).duration(300).style('opacity', 1);
 
-  // Axis only bottom, custom tick labels
-  const xAxis = g.append('g').attr('class','d3-axis').attr('transform',`translate(0,${h})`).call(d3.axisBottom(x).tickSize(0));
-  xAxis.select('.domain').remove();
-  xAxis.selectAll('text')
-    .style('font-size','9px').style('font-style','italic')
-    .attr('dy','1.2em').text(d => d.split('\n')[0]);
+  // Sub-labels inside bars
+  grpG.selectAll('.psub').data(d => d.bars)
+    .enter().append('text')
+    .attr('x', d => x1(d.sub) + x1.bandwidth() / 2)
+    .attr('y', h - 5)
+    .attr('text-anchor', 'middle')
+    .style('font-family', 'Lora,serif').style('font-size', '9px').style('font-style', 'italic')
+    .style('fill', 'rgba(255,255,255,0.6)')
+    .text(d => d.sub);
 
-  g.append('g').attr('class','d3-axis').call(d3.axisLeft(y).ticks(5).tickFormat(d=>d+'%')).select('.domain').remove();
+  // X axis group labels (multi-line)
+  const xAx = g.append('g').attr('class','d3-axis')
+    .attr('transform', `translate(0,${h})`)
+    .call(d3.axisBottom(x0).tickSize(0));
+  xAx.select('.domain').remove();
+  xAx.selectAll('text').each(function(d) {
+    const t = d3.select(this);
+    t.text(null);
+    d.split('\n').forEach((line, i) => {
+      t.append('tspan').attr('x', 0).attr('dy', i === 0 ? '1.1em' : '1.2em')
+        .style('font-size', '10px').style('font-style', 'italic').text(line);
+    });
+  });
+
+  g.append('g').attr('class','d3-axis')
+    .call(d3.axisLeft(y).ticks(4).tickFormat(d => d + '%')).select('.domain').remove();
+
+  // Legend
+  const legend = g.append('g').attr('transform', `translate(${w - 110}, -22)`);
+  [{ l:'Male', c: C.male }, { l:'Female', c: C.female }].forEach((d, i) => {
+    const lg = legend.append('g').attr('transform', `translate(${i * 60}, 0)`);
+    lg.append('rect').attr('width', 9).attr('height', 9).attr('rx', 2).attr('fill', d.c);
+    lg.append('text').attr('x', 12).attr('y', 8)
+      .style('font-family','Lora,serif').style('font-size','9px').style('fill','#9ab8d0').text(d.l);
+  });
 }
 
 // ============================================================
